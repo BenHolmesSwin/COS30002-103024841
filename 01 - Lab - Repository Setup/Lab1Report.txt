@@ -1,0 +1,5 @@
+Ben Holmes - 103024841 - COS30002 - 01.P
+
+- readme markdown edited with my info and other todos/info left for later when they will be useful as reminders for improvements
+- repository fully setup with tutor Tien Pham (Hello again :)) added as a collaborator
+- There were no real difficulties, just getting sourcetree to start working after not using it for a few months cause sourcetree is dumb
