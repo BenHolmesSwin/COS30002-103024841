@@ -6,7 +6,9 @@ This is the base repository for AI for Games @ Swinburne University. Students ar
 # 2024 AI for Games
 
 ## Who Am I?
-TODO: Add your name, student id, and easy email link here, formatted as a unordered list.
+-Ben Holmes
+-103024841
+-[Email](103024841@student.swin.edu.au)
 
 ## Purpose
 * Your fork of this repository is for you and the teaching staff only. It should private and not be visible to the world.
@@ -33,7 +35,6 @@ habit for this unit. However, please keep in mind that this repository should NO
 
 ## Notes
 * Do not share teaching materials provided in this unit online. That include lecture notes, sample code, spike documents, as well as your own work that could be inappropriately used by someone else.
-* TODO: Learn to use markdown! There are many introduction tutorials to markdown.
 
 ## About Not Sharing Unit Materials and Your Work Publically.
 You may think that asking you not to share teaching resources online, and not sharing your own work, is restrictive. However, we require this to protect both your work from misuse, as well as to limit issues with teaching materials being shared in an uncontrolled way.
