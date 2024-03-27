@@ -109,28 +109,61 @@ def get_ai_move():
 # Task 4 ai and board stuff
 
 def get_ai_move_spike():
-    # random AI for task 4
     board_move = ai_find_next_move_for_win()
     if board_move == None:
         return randrange(9)
     else:
         return board_move
 
-def ai_find_next_move_for_win():
-    # task 4 possible board graph
+def ai_find_next_move_for_win(root_board):
     i = 0
     while i < 9:
-        board_root = board[:]
-        if board_root[i] == ' ':
-            board_root[i] = current_player
+        if root_board[i] == ' ':
+            root_board[i] = current_player
             for row in WIN_SET:
-                if board_root[row[0]] == board_root[row[1]] == board_root[row[2]] != ' ':
+                if root_board[row[0]] == root_board[row[1]] == root_board[row[2]] != ' ':
                     return i
             i += 1
         else:
             i += 1
             continue
     return None
+
+def generate_possible_path_stupid():
+    board_state = get_current_board_state()
+    return None
+
+def get_current_board_state():
+    return Board_State(current_player,board,move)
+
+class Board_State(object):
+    '''A Board State'''
+    def __init__(self, current_player = 'x', board = [' ']*9, move = 9):
+        # move's default set at 9 is so that if it does somehow get set as the default, it wont affect anything as 9 is an invalid move
+        self.current_player = current_player
+        self.board = board
+        self.move_count = 0
+        self.previous_move = move
+        #cycling through current board to check how many moves have occured if move count was not provided
+        i = 0
+        while i < 9:
+            if self.board[i] != ' ':
+                self.move_count += 1
+            i += 1
+
+    def do_move(self,move):
+        if self.move_count == 9:
+            return False
+        self.board[move] = self.current_player
+        self.move_count +=1
+        self.previous_move = move
+        if self.current_player == 'x':
+            self.current_player = 'o'
+        else:
+            self.current_player = 'x'
+        return True
+
+
             
 #==============================================================================
 # Standard trinity of game loop methods (functions)
