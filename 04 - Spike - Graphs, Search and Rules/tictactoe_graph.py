@@ -110,13 +110,13 @@ def get_ai_move():
 
 def get_ai_move_spike():
     # random AI for task 4
-    board_move = get_board_state()
+    board_move = ai_find_next_move_for_win()
     if board_move == None:
         return randrange(9)
     else:
         return board_move
 
-def get_board_state():
+def ai_find_next_move_for_win():
     # task 4 possible board graph
     i = 0
     while i < 9:
