@@ -130,7 +130,7 @@ def ai_find_next_move_for_win(root_board):
     return None
 
 def generate_possible_path_stupid():
-    # deliverable 2
+    # deliverable 2 & 3
     board_state = get_current_board_state()
     board_state_list = [board_state]
     win = False
@@ -143,6 +143,8 @@ def generate_possible_path_stupid():
                 move = True
                 win = True
         board_state_list.append(board_state)
+        if board_state_list.__len__ == 3: #(Deliverable 3) this is to limit the search to 1 move deep rather than until win or length out
+            win = True
         for row in WIN_SET:
             if board_state.board[row[0]] == board_state.board[row[1]] == board_state.board[row[2]] != ' ':
                 win = True
