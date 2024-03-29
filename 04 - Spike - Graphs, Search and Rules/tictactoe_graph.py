@@ -211,7 +211,6 @@ def random_path_min_max():
     counter = 1
     while counter < 20:
         if len(path) <= len(tree[counter]):
-            
             path = tree[counter][:]
         counter += 1
     return path
