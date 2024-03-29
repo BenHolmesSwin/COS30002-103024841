@@ -33,6 +33,7 @@ Updates:
 '''
 
 from random import randrange
+from copy import deepcopy
 
 # static game data - doesn't change (hence immutable tuple data type)
 WIN_SET = (
@@ -109,44 +110,88 @@ def get_ai_move():
 # Task 4 ai and board stuff
 
 def get_ai_move_spike():
-    state_board = generate_possible_path_stupid()
+    state_board = random_path_min_max()
     board_move = state_board[1].previous_move
     return board_move
 
-def ai_find_next_move_for_win(root_board):
-    i = 0
-    while i < 9:
-        if root_board[i] == ' ':
-            root_board[i] = current_player
-            for row in WIN_SET:
-                if root_board[row[0]] == root_board[row[1]] == root_board[row[2]] != ' ':
-                    return i
-            i += 1
+def ai_find_next_move_for_win_or_block(node_board,node_player):
+    # part of deliverable 4
+    counter = 0
+    while counter <= 1:
+        i = 0
+        while i < 9:
+            if node_board[i] == ' ':
+                node_board[i] = node_player
+                for row in WIN_SET:
+                    if node_board[row[0]] == node_board[row[1]] == node_board[row[2]] != ' ':
+                        node_board[i] = ' '
+                        return i
+                node_board[i] = ' '
+                i += 1
+            else:
+                i += 1
+                continue
+        if node_player == 'x': #this bit of code is to run the cycle as the other player to check if they have a winning move and to block it
+            node_player = 'o'
         else:
-            i += 1
-            continue
+            node_player = 'x'
+        counter += 1
     return None
 
 def generate_possible_path_stupid():
     # deliverable 2 & 3
     board_state = get_current_board_state()
-    board_state_list = [board_state]
+    board_state_list = [deepcopy(board_state)]
     win = False
     while win == False:
         move = False
         while move == False:
-            try_move = randrange(9)
+            if board_state.node_player == 'o':# if the current node player is ai
+                try_move = ai_find_next_move_for_win_or_block(board_state.board_node[:],board_state.node_player)
+                if try_move == None:
+                    if board_state.board_node[4] == ' ': #attempts to go for 
+                        try_move = 4
+                    else:
+                        try_move = randrange(9)
+            else: #if current node player is human
+                try_move = randrange(9)
             move = board_state.do_move(try_move)
             if board_state.move_count == 9: # incase of draw
                 move = True
                 win = True
-        board_state_list.append(board_state)
-        if len(board_state_list) == 3: #(Deliverable 3) this is to limit the search to 1 move deep rather than until win or length out
-            win = True
+        board_state_list.append(deepcopy(board_state))
+        #if len(board_state_list) == 3: #(Deliverable 3) this is to limit the search to 1 move deep rather than until win or length out
+            #win = True
         for row in WIN_SET:
             if board_state.board_node[row[0]] == board_state.board_node[row[1]] == board_state.board_node[row[2]] != ' ':
                 win = True
     return board_state_list
+
+def random_path_min_max():
+    # deliverable 4 min max with random moves using generate possible path stupid
+    counter = 0
+    tree = []
+    while counter <20:
+        board_state_list = generate_possible_path_stupid()
+        #print('This is path %s' % counter)# this is for displaying each of the board state paths as they are generated
+        #for board_state in board_state_list: 
+        #    print('         %s' % board_state.move_count)
+        #    print('    %s | %s | %s' % tuple(board_state.board_node[:3]))
+        #    print('   -----------')
+        #    print('    %s | %s | %s' % tuple(board_state.board_node[3:6]))
+        #    print('   -----------')
+        #    print('    %s | %s | %s' % tuple(board_state.board_node[6:]))
+        #    print('   ___________')
+        tree.append(board_state_list[:])
+        counter += 1
+    path = tree[0]
+    counter = 1
+    while counter < 20:
+        if len(path) <= len(tree[counter]):
+            
+            path = tree[counter][:]
+        counter += 1
+    return path
 
 def get_current_board_state():
     #deliverable 1
