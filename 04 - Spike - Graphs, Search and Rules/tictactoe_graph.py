@@ -109,11 +109,9 @@ def get_ai_move():
 # Task 4 ai and board stuff
 
 def get_ai_move_spike():
-    board_move = ai_find_next_move_for_win()
-    if board_move == None:
-        return randrange(9)
-    else:
-        return board_move
+    state_board = generate_possible_path_stupid()
+    board_move = state_board[1].previous_move
+    return board_move
 
 def ai_find_next_move_for_win(root_board):
     i = 0
@@ -143,42 +141,42 @@ def generate_possible_path_stupid():
                 move = True
                 win = True
         board_state_list.append(board_state)
-        if board_state_list.__len__ == 3: #(Deliverable 3) this is to limit the search to 1 move deep rather than until win or length out
+        if len(board_state_list) == 3: #(Deliverable 3) this is to limit the search to 1 move deep rather than until win or length out
             win = True
         for row in WIN_SET:
-            if board_state.board[row[0]] == board_state.board[row[1]] == board_state.board[row[2]] != ' ':
+            if board_state.board_node[row[0]] == board_state.board_node[row[1]] == board_state.board_node[row[2]] != ' ':
                 win = True
     return board_state_list
 
 def get_current_board_state():
     #deliverable 1
-    return Board_State(current_player,board,move)
+    return Board_State(current_player,board[:],move)
 
 class Board_State(object):
     '''A Board State'''
     #delivarable 1
     def __init__(self, current_player = 'x', board = [' ']*9, previous_move = 9):
         # move's default set at 9 is so that if it does somehow get set as the default, it wont affect anything as 9 is an invalid move
-        self.current_player = current_player
-        self.board = board
+        self.node_player = current_player
+        self.board_node = board
         self.move_count = 0
         self.previous_move = previous_move
         #cycling through current board to check how many moves have occured
         i = 0
         while i < 9:
-            if self.board[i] != ' ':
+            if self.board_node[i] != ' ':
                 self.move_count += 1
             i += 1
 
-    def do_move(self,move:int):
-        if self.board[move] == ' ' & self.move_count < 9:
-            self.board[move] = self.current_player
-            self.move_count +=1
-            self.previous_move = move
-            if self.current_player == 'x':
-                self.current_player = 'o'
+    def do_move(self,try_move:int):
+        if self.board_node[try_move] == ' ' and self.move_count < 9:
+            self.board_node[try_move] = self.node_player
+            self.move_count += 1
+            self.previous_move = try_move
+            if self.node_player == 'x':
+                self.node_player = 'o'
             else:
-                self.current_player = 'x'
+                self.node_player = 'x'
             return True
         else:
             return False
@@ -195,7 +193,7 @@ def process_input():
     if current_player == 'x':
         move = get_human_move()
     else:
-        move = get_ai_move()
+        move = get_ai_move_spike()
 
 
 def update_model():
