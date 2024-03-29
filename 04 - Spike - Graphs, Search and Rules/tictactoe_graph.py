@@ -130,38 +130,56 @@ def ai_find_next_move_for_win(root_board):
     return None
 
 def generate_possible_path_stupid():
+    # deliverable 2
     board_state = get_current_board_state()
-    return None
+    board_state_list = [board_state]
+    win = False
+    while win == False:
+        move = False
+        while move == False:
+            try_move = randrange(9)
+            move = board_state.do_move(try_move)
+            if board_state.move_count == 9: # incase of draw
+                move = True
+                win = True
+        board_state_list.append(board_state)
+        for row in WIN_SET:
+            if board_state.board[row[0]] == board_state.board[row[1]] == board_state.board[row[2]] != ' ':
+                win = True
+    return board_state_list
 
 def get_current_board_state():
+    #deliverable 1
     return Board_State(current_player,board,move)
 
 class Board_State(object):
     '''A Board State'''
-    def __init__(self, current_player = 'x', board = [' ']*9, move = 9):
+    #delivarable 1
+    def __init__(self, current_player = 'x', board = [' ']*9, previous_move = 9):
         # move's default set at 9 is so that if it does somehow get set as the default, it wont affect anything as 9 is an invalid move
         self.current_player = current_player
         self.board = board
         self.move_count = 0
-        self.previous_move = move
-        #cycling through current board to check how many moves have occured if move count was not provided
+        self.previous_move = previous_move
+        #cycling through current board to check how many moves have occured
         i = 0
         while i < 9:
             if self.board[i] != ' ':
                 self.move_count += 1
             i += 1
 
-    def do_move(self,move):
-        if self.move_count == 9:
-            return False
-        self.board[move] = self.current_player
-        self.move_count +=1
-        self.previous_move = move
-        if self.current_player == 'x':
-            self.current_player = 'o'
+    def do_move(self,move:int):
+        if self.board[move] == ' ' & self.move_count < 9:
+            self.board[move] = self.current_player
+            self.move_count +=1
+            self.previous_move = move
+            if self.current_player == 'x':
+                self.current_player = 'o'
+            else:
+                self.current_player = 'x'
+            return True
         else:
-            self.current_player = 'x'
-        return True
+            return False
 
 
             
