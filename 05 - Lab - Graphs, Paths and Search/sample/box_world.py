@@ -61,7 +61,7 @@ box_types = {
 	"WALL":{"symbol":'X', "colour":"GREY"},
 }
 
-min_edge_cost = 10.0 # must be min value for heuristic cost to work
+min_edge_cost = 1.0 # must be min value for heuristic cost to work
 
 # def edge_cost(k1, k2):
 # 	k1 = box_type.index(k1)

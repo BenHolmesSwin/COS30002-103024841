@@ -1,0 +1,33 @@
+Ben Holmes - 103024841 - COS30002 - 05.P
+
+- files updated to use new files given on 24-03-2024
+- pyglet installed via pip
+- messed around with the graph to understand how all the controls worked and to start to understand the different methods,
+
+-- observations on inital (as in with no changes to the code) graph interactions 
+- DFS search always uses the same path to get to the same point (assuming no walls) no matter the cost of the tiles in that path and no matter if it is direct or not
+- BFS will do something similar however on a low path and then up directly to the point if no walls no matter the material rather than a long and windy path like DFS
+- Dijkstra will do its best to avoid any non clear tiles on its path to limit the cost to as low as possible no matter how long the path needs to be
+- A* in its inital form lowers the path to as short as possible while trying to decrease the cost as much as possible, although it does prioritise the path length over the cost
+  as on short paths it seems to always go as short as possible even if there is a much cheaper path that is only slightly longer (5 total clear tiles compared to 3 water)
+- also both DFS and A* can have a very low number of steps (DFS only happens if its on its expected long path) whereas BFS and Dijkstra are larger in most 
+  midrange cases (paths longer than 2)
+
+
+-- A* min_edge_cost change observations
+- i changed the the min_edge_cost to 1.0 to get the correct pathing, this changed the alogrythm to prioritise the cost over the path length.
+- to test/prove this change i made a start point in 0 and target in 5 with two mud tiles in 3 and 4 on map1, results:
+- with old value
+Success! Done! Steps: 6 Cost: 10.0
+Path (6)=[0, 1, 2, 3, 4, 5]
+Open (5)=pq: [(30.0, 10, 10), (36.0, 8, 9), (43.0, 6, 8), (52.0, 4, 7), (61.0, 2, 6)]
+Closed (6)={0, 1, 2, 3, 4, 5}
+Route (11)={0: 0, 1: 0, 6: 0, 2: 1, 7: 1, 3: 2, 8: 2, 4: 3, 9: 3, 5: 4, 10: 4}
+- with new value
+Success! Done! Steps: 11 Cost: 7.0
+Path (8)=[0, 1, 2, 8, 9, 10, 11, 5]
+Open (7)=pq: [(8.0, 15, 4), (9.0, 9, 12), (9.0, 10, 13), (9.0, 12, 14), (9.0, 14, 15), (9.0, 17, 16), (9.0, 19, 17)]
+Closed (11)={0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11}
+Route (18)={0: 0, 1: 0, 6: 0, 2: 1, 7: 1, 3: 2, 8: 2, 4: 10, 9: 8, 12: 6, 13: 7, 14: 8, 10: 9, 15: 9, 11: 10, 16: 10, 5: 11, 17: 11}
+
+- as shown in these results the cost decreased by 3 while the path length increased by 2, the steps did also increase by 5
