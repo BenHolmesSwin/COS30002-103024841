@@ -13,6 +13,13 @@ Ben Holmes - 103024841 - COS30002 - 05.P
 - also both DFS and A* can have a very low number of steps (DFS only happens if its on its expected long path) whereas BFS and Dijkstra are larger in most 
   midrange cases (paths longer than 2)
 
+-- differences between path methods
+- DFS search takes the most steps and longest path without considering cost as it always does the same path with only slight changes for the end point being off the path,
+  which then it gets to the closest point and deviates
+- BFS will take the shortest possible path (or as close to it as it finds) and will always take that path no matter the cost
+- A* and Dijkstra are nearly identical in the path they produce by taking the most cost effective short path, the main difference i observed was that Dijkstra takes more steps
+  and Dijkstra tends to have very few open possibleities
+- with the Diagonals implemented, A* and Dijkstra's paths do diverge slightly on a completely clear map with start and target in oposite corners.
 
 -- A* min_edge_cost change observations
 - i changed the the min_edge_cost to 1.0 to get the correct pathing, this changed the alogrythm to prioritise the cost over the path length.
@@ -31,3 +38,20 @@ Closed (11)={0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11}
 Route (18)={0: 0, 1: 0, 6: 0, 2: 1, 7: 1, 3: 2, 8: 2, 4: 10, 9: 8, 12: 6, 13: 7, 14: 8, 10: 9, 15: 9, 11: 10, 16: 10, 5: 11, 17: 11}
 
 - as shown in these results the cost decreased by 3 while the path length increased by 2, the steps did also increase by 5
+
+
+-- Diagonals
+- The code uncommented ads diagonal paths as options for all the searches to use, this imeadetly changes the pathing as going diagonal is only 1.41 times more expensive 
+  than going straight, this means that alot of the time a mud would be gone through rather than adding 3 extra clear tiles to go around, the path would go diagonally around it.
+- The manhattan distance is the distance between 2 points that measure along grid coodinates rather than a direct straight line, this means that the distance between 2 points
+  is 
+  result = |x1-x2| + |y1-y2| 
+  rather than 
+  resutl^2 = (x1-x2)^2 + (y1-y2)^2      (pythagoras)
+  
+- in A* the manhattan distance is used as an estimate of the minimum cost to get between two points (using the minimum edge cost in order to not overestimate) so that it
+  can find the most efficent path
+- with diagonals impletmented the manhattan distance should no longer be used as it is not accurate as it does not take into account diagonals.
+- the other 2 heurstic functions are called here _hypot and _max
+  _hypot is using the pythagoras method of figuring out the hypotenuses via the python hypot function to estimate the direct (euclidean) distance between two points
+  _max is using max(|x1-x2| + |y1-y2|) instead which is know as the Chebyshev distance which is similar to the manhattan disatnce but takes into accont diagonal paths
