@@ -1,0 +1,4 @@
+4 seperate agents, 4 A*
+1 agent ignores terrain, 1 good at hills and mud, 1 passes through walls ,1 standard
+use different pathing weigths,
+6 tiles. mud, water, wall, grass, road, hill
