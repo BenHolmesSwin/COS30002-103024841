@@ -33,6 +33,7 @@ class GameWindow(pyglet.window.Window):
 			'EDGES': False,
 			'TREE': False,
 			'PATH': True,
+			'AGENT': True,
 		}
 		#pyglet batches vastly improve rendering efficiency, 
 		#and allow us to efficiently turn on and off rendering groups of primitives
@@ -42,6 +43,7 @@ class GameWindow(pyglet.window.Window):
 			"edges": pyglet.graphics.Batch(),
 			"tree": pyglet.graphics.Batch(),
 			"path": pyglet.graphics.Batch(),
+			"agent": pyglet.graphics.Batch(),
 		}
 		self.labels = {
 			'mouse':	pyglet.text.Label('', x=5, y=self.height-20, color=COLOUR_NAMES['BLACK']),
