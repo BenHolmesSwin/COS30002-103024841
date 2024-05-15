@@ -18,9 +18,13 @@ class agent(object):
         self.agent_number = agent_number
         self.path_color = path_color
         self.agent_color = agent_color
+        self.x = 0
+        self.y = 0
 
         self.search = 3
         self.limit = 0
+        self.counter = 1
+        self.move = 0
 
         self.path = None
         self.graph = None
@@ -30,6 +34,7 @@ class agent(object):
         self.render_tree = []
         self.render_open_nodes = []
         self.render_graph = []
+        self.render_agents = None
 
     def _add_edge(self, from_idx, to_idx, distance=1.0):
         b = self.boxes
@@ -171,3 +176,33 @@ class agent(object):
             print("Can't have the same start and end boxes!")
             return
         self.target = self.boxes[idx]
+    
+    def update(self):
+        if self.path == None:
+            return   
+        if self.counter == 60:# the value of 60 means it travels across an entire move over 60 frames
+            self.counter = 1
+            self.move += 1
+        if self.move == self.path.path.__len__() - 1:
+            return
+        move_start = self.boxes[self.path.path[self.move]]
+        move_end = self.boxes[self.path.path[self.move + 1]]
+        x_change = move_end.center().x - move_start.center().x
+        y_change = move_end.center().y - move_start.center().y
+        x = x_change * (self.counter/60) + move_start.center().x
+        y = y_change * (self.counter/60) + move_start.center().y
+        self.counter += 1
+        self.render_agents = pyglet.shapes.Circle(
+                        x, 
+                        y,
+                        5, 
+                        color=self.agent_color,
+                        batch=window.get_batch("agents")
+                    )
+        
+    def reset(self):
+        self.counter = 1
+        self.move = 0
+
+        
+

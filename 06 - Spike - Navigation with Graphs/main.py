@@ -11,7 +11,8 @@ See readme.txt for details.
 '''
 
 import sys
-import pyglet
+from pyglet import app
+from pyglet import clock
 #importing graphics for side-effects - it creates the egi and window module objects. 
 #This is the closest python has to a global variable and it's completely gross
 import graphics
@@ -26,4 +27,5 @@ if __name__ == '__main__':
 		filename = "map2.txt"
 
 	game.game = game.Game(filename)
-	pyglet.app.run()
+	#clock.schedule_interval(graphics.window.on_update(), 1/60)
+	app.run()

@@ -161,6 +161,7 @@ class BoxWorld(object):
 		self.render_tree = []
 		self.render_open_nodes = []
 		self.render_graph = []
+		self.render_agents = []
 		self.agents = [
 			agent(self.start,self.target,box_types_agent1,self._max,self.x_boxes,self.y_boxes,self.boxes,1,COLOUR_NAMES['BLUE'],COLOUR_NAMES['BROWN']),
 			agent(self.start,self.target,box_types_agent2,self._max,self.x_boxes,self.y_boxes,self.boxes,2,COLOUR_NAMES['GREEN'],COLOUR_NAMES['ORANGE']),
@@ -224,7 +225,7 @@ class BoxWorld(object):
 		for agent in self.agents:
 			agent.set_target(idx)
 
-	def plan_path(self, search, limit):
+	def plan_path(self):
 		'''Conduct a nav-graph search from the current world start node to the
 		current target node, using a search method that matches the string
 		specified in `search`.
@@ -245,10 +246,22 @@ class BoxWorld(object):
 			except:
 				pass
 		for agent in self.agents:
+			agent.reset()
 			agent.plan_path()
 			self.render_path.append(agent.render_path)
 			self.render_tree.append(agent.render_tree)
 			self.render_open_nodes.append(agent.render_open_nodes)
+	
+	def update(self):
+		for line in self.render_agents:
+			try:
+				line.delete() #pyglets Line.delete method is slightly broken
+			except:
+				pass
+		for agent in self.agents:
+			agent.update()
+			self.render_agents.append(agent.render_agents)
+
 
 
 	@classmethod

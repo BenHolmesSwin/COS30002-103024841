@@ -12,7 +12,7 @@ box_types_agent1 = {
 	"GRASS":{"symbol":'.', "cost":{"GRASS":2, "MUD":5,"WATER":7,"HILL":2,"ROAD":2}, "colour":"WHITE"},
 	"MUD":{"symbol":'m', "cost":{"GRASS":2, "MUD":7,"WATER":9,"HILL":4,"ROAD":3}, "colour":"BROWN"},
 	"WATER":{"symbol":'~', "cost":{"GRASS":2, "MUD":9,"WATER":10,"HILL":4,"ROAD":4}, "colour":"AQUA"},
-	"HILL":{"symbol":'-', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":1,"ROAD":3}, "colour":"DARK_GREEN"},
+	"HILL":{"symbol":'-', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":1,"ROAD":2}, "colour":"DARK_GREEN"},
 	"ROAD":{"symbol":'=', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":1,"ROAD":1}, "colour":"YELLOW"},
 	"WALL":{"symbol":'X', "colour":"GREY"},
 }
