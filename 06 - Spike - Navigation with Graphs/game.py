@@ -30,7 +30,7 @@ class Game():
 		window._update_label('mouse', 'Click to place: '+self.mouse_mode.name)
 
 		# search mode cycles through the search algorithm used by box_world
-		self.search_mode = 1
+		self.search_mode = 3
 		window._update_label('search', 'Search Type: '+SearchModes(self.search_mode).name)
 		# search limit
 		self.search_limit = 0 # unlimited.

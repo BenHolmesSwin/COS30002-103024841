@@ -54,12 +54,43 @@ from point2d import Point2D
 from graph import SparseGraph, Node, Edge
 from searches import SEARCHES
 
+#the box_types used to make the graph and the base values that apply to agent 4
 box_types = {
 	"GRASS":{"symbol":'.', "cost":{"GRASS":2, "MUD":5,"WATER":7,"HILL":4,"ROAD":2}, "colour":"WHITE"},
 	"MUD":{"symbol":'m', "cost":{"GRASS":2, "MUD":7,"WATER":9,"HILL":4,"ROAD":3}, "colour":"BROWN"},
 	"WATER":{"symbol":'~', "cost":{"GRASS":2, "MUD":9,"WATER":10,"HILL":4,"ROAD":4}, "colour":"AQUA"},
-	"HILL":{"symbol":'~', "cost":{"GRASS":2, "MUD":6,"WATER":10,"HILL":4,"ROAD":3}, "colour":"DARK_GREEN"},
-	"ROAD":{"symbol":'~', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":4,"ROAD":1}, "colour":"YELLOW"},
+	"HILL":{"symbol":'-', "cost":{"GRASS":2, "MUD":6,"WATER":10,"HILL":4,"ROAD":3}, "colour":"DARK_GREEN"},
+	"ROAD":{"symbol":'=', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":4,"ROAD":1}, "colour":"YELLOW"},
+	"WALL":{"symbol":'X', "colour":"GREY"},
+}
+
+#the box_type values used by agent 1 (this one is better on hills)
+box_types_agent1 = {
+	"GRASS":{"symbol":'.', "cost":{"GRASS":2, "MUD":5,"WATER":7,"HILL":2,"ROAD":2}, "colour":"WHITE"},
+	"MUD":{"symbol":'m', "cost":{"GRASS":2, "MUD":7,"WATER":9,"HILL":4,"ROAD":3}, "colour":"BROWN"},
+	"WATER":{"symbol":'~', "cost":{"GRASS":2, "MUD":9,"WATER":10,"HILL":4,"ROAD":4}, "colour":"AQUA"},
+	"HILL":{"symbol":'-', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":1,"ROAD":3}, "colour":"DARK_GREEN"},
+	"ROAD":{"symbol":'=', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":1,"ROAD":1}, "colour":"YELLOW"},
+	"WALL":{"symbol":'X', "colour":"GREY"},
+}
+
+#the box_type values used by agent 2 (this one passes through walls)
+box_types_agent2 = {
+	"GRASS":{"symbol":'.', "cost":{"GRASS":2, "MUD":5,"WATER":7,"HILL":4,"ROAD":2,"WALL":1}, "colour":"WHITE"},
+	"MUD":{"symbol":'m', "cost":{"GRASS":2, "MUD":7,"WATER":9,"HILL":4,"ROAD":3,"WALL":1}, "colour":"BROWN"},
+	"WATER":{"symbol":'~', "cost":{"GRASS":2, "MUD":9,"WATER":10,"HILL":4,"ROAD":4,"WALL":1}, "colour":"AQUA"},
+	"HILL":{"symbol":'-', "cost":{"GRASS":2, "MUD":6,"WATER":10,"HILL":4,"ROAD":3,"WALL":1}, "colour":"DARK_GREEN"},
+	"ROAD":{"symbol":'=', "cost":{"GRASS":2, "MUD":4,"WATER":10,"HILL":4,"ROAD":1,"WALL":1}, "colour":"YELLOW"},
+	"WALL":{"symbol":'X', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1,"WALL":1}, "colour":"GREY"},
+}
+
+#the box_type values used by agent 3 (this one ignores terrain values but cant pass through walls)
+box_types_agent3 = {
+	"GRASS":{"symbol":'.', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1}, "colour":"WHITE"},
+	"MUD":{"symbol":'m', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1}, "colour":"BROWN"},
+	"WATER":{"symbol":'-', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1}, "colour":"AQUA"},
+	"HILL":{"symbol":'=', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1}, "colour":"DARK_GREEN"},
+	"ROAD":{"symbol":'~', "cost":{"GRASS":1, "MUD":1,"WATER":1,"HILL":1,"ROAD":1}, "colour":"YELLOW"},
 	"WALL":{"symbol":'X', "colour":"GREY"},
 }
 
@@ -145,7 +176,13 @@ class BoxWorld(object):
 			)
 		# create nav_graph
 		self.path = None
+		self.path_agent1 = None
+		self.path_agent2 = None
+		self.path_agent3 = None
 		self.graph = None
+		self.graph_agent1 = None
+		self.graph_agent2 = None
+		self.graph_agent3 = None
 		
 		self.start = self.boxes[1]
 		self.start_marker = pyglet.shapes.Arc( #in pyglet a circle is filled, an arc is unfilled
@@ -187,6 +224,24 @@ class BoxWorld(object):
 		if "cost" in box_types[b[from_idx].type] and b[to_idx].type in box_types[b[from_idx].type]["cost"]:
 			cost = box_types[b[from_idx].type]["cost"][b[to_idx].type]
 			self.graph.add_edge(Edge(from_idx, to_idx, cost*distance))
+	
+	def _add_edge_agent1(self, from_idx, to_idx, distance=1.0):
+		b = self.boxes
+		if "cost" in box_types_agent1[b[from_idx].type] and b[to_idx].type in box_types_agent1[b[from_idx].type]["cost"]:
+			cost = box_types_agent1[b[from_idx].type]["cost"][b[to_idx].type]
+			self.graph_agent1.add_edge(Edge(from_idx, to_idx, cost*distance))
+
+	def _add_edge_agent2(self, from_idx, to_idx, distance=1.0):
+		b = self.boxes
+		if "cost" in box_types_agent2[b[from_idx].type] and b[to_idx].type in box_types_agent2[b[from_idx].type]["cost"]:
+			cost = box_types_agent2[b[from_idx].type]["cost"][b[to_idx].type]
+			self.graph_agent2.add_edge(Edge(from_idx, to_idx, cost*distance))
+	
+	def _add_edge_agent3(self, from_idx, to_idx, distance=1.0):
+		b = self.boxes
+		if "cost" in box_types_agent3[b[from_idx].type] and b[to_idx].type in box_types_agent3[b[from_idx].type]["cost"]:
+			cost = box_types_agent3[b[from_idx].type]["cost"][b[to_idx].type]
+			self.graph_agent3.add_edge(Edge(from_idx, to_idx, cost*distance))
 
 	def _manhattan(self, idx1, idx2):
 		''' Manhattan distance between two nodes in boxworld, assuming the
@@ -215,53 +270,109 @@ class BoxWorld(object):
 		The graph is build by adding NavNode to the graph for each of the
 		boxes in box world. Then edges are created (4-sided).
 		'''
-		self.path = None # invalid so remove if present
+		self.path = None
+		self.path_agent1 = None
+		self.path_agent2 = None
+		self.path_agent3 = None
 		self.graph = SparseGraph()
-		# Set a heuristic cost function for the search to use
-		#self.graph.cost_h = self._manhattan
-		#self.graph.cost_h = self._hypot
+		self.graph_agent1 = SparseGraph()
+		self.graph_agent2 = SparseGraph()
+		self.graph_agent3 = SparseGraph()
 		self.graph.cost_h = self._max
+		self.graph_agent1.cost_h = self._max
+		self.graph_agent2.cost_h = self._max
+		self.graph_agent3.cost_h = self._max
 
 		nx, ny = self.x_boxes, self.y_boxes
 		# add all the nodes required
 		for i, box in enumerate(self.boxes):
 			box.pos = (i % nx, i // nx) #tuple position
 			box.node = self.graph.add_node(Node(idx=i))
+			box.node = self.graph_agent1.add_node(Node(idx=i))
+			box.node = self.graph_agent2.add_node(Node(idx=i))
+			box.node = self.graph_agent3.add_node(Node(idx=i))
 		# build all the edges required for this world
 		for i, box in enumerate(self.boxes):
+			# Agent 2 is in its own serperate catergories because it needs to pass through walls and as a result has a cost in the walls term that none of the others do
 			# four sided N-S-E-W connections
-			if "cost" not in box_types[box.type]:
-				continue
 			# UP (i + nx)
 			if (i+nx) < len(self.boxes):
-				self._add_edge(i, i+nx)
+				self._add_edge_agent2(i, i+nx)
 			# DOWN (i - nx)
 			if (i-nx) >= 0:
-				self._add_edge(i, i-nx)
+				self._add_edge_agent2(i, i-nx)
 			# RIGHT (i + 1)
 			if (i%nx + 1) < nx:
-				self._add_edge(i, i+1)
+				self._add_edge_agent2(i, i+1)
 			# LEFT (i - 1)
 			if (i%nx - 1) >= 0:
-				self._add_edge(i, i-1)
+				self._add_edge_agent2(i, i-1)
 			# Diagonal connections
 			# UP LEFT(i + nx - 1)
 			j = i + nx
 			if (j-1) < len(self.boxes) and (j%nx - 1) >= 0:
-				self._add_edge(i, j-1, 1.4142) # sqrt(1+1)
+				self._add_edge_agent2(i, j-1, 1.4142)
+			# UP RIGHT (i + nx + 1)
+			j = i + nx
+			if (j+1) < len(self.boxes) and (j%nx + 1) < nx:
+				self._add_edge_agent2(i, j+1, 1.4142)
+			# DOWN LEFT(i - nx - 1)
+			j = i - nx
+			if (j-1) >= 0 and (j%nx - 1) >= 0:
+				print(i, j, j%nx)
+				self._add_edge_agent2(i, j-1, 1.4142)
+			# DOWN RIGHT (i - nx + 1)
+			j = i - nx
+			if (j+1) >= 0 and (j%nx +1) < nx:
+				self._add_edge_agent2(i, j+1, 1.4142)
+			if "cost" not in box_types[box.type]: #checks if its a wall for other 3 agents
+				continue
+			# UP (i + nx)
+			if (i+nx) < len(self.boxes):
+				self._add_edge(i, i+nx)
+				self._add_edge_agent1(i, i+nx)
+				self._add_edge_agent3(i, i+nx)
+			# DOWN (i - nx)
+			if (i-nx) >= 0:
+				self._add_edge(i, i-nx)
+				self._add_edge_agent1(i, i-nx)
+				self._add_edge_agent3(i, i-nx)
+			# RIGHT (i + 1)
+			if (i%nx + 1) < nx:
+				self._add_edge(i, i+1)
+				self._add_edge_agent1(i, i+1)
+				self._add_edge_agent3(i, i+1)
+			# LEFT (i - 1)
+			if (i%nx - 1) >= 0:
+				self._add_edge(i, i-1)
+				self._add_edge_agent1(i, i-1)
+				self._add_edge_agent3(i, i-1)
+			# Diagonal connections
+			# UP LEFT(i + nx - 1)
+			j = i + nx
+			if (j-1) < len(self.boxes) and (j%nx - 1) >= 0:
+				self._add_edge(i, j-1, 1.4142)
+				self._add_edge_agent1(i, j-1, 1.4142)
+				self._add_edge_agent3(i, j-1, 1.4142)
 			# UP RIGHT (i + nx + 1)
 			j = i + nx
 			if (j+1) < len(self.boxes) and (j%nx + 1) < nx:
 				self._add_edge(i, j+1, 1.4142)
+				self._add_edge_agent1(i, j+1, 1.4142)
+				self._add_edge_agent3(i, j+1, 1.4142)
 			# DOWN LEFT(i - nx - 1)
 			j = i - nx
 			if (j-1) >= 0 and (j%nx - 1) >= 0:
 				print(i, j, j%nx)
 				self._add_edge(i, j-1, 1.4142)
+				self._add_edge_agent1(i, j-1, 1.4142)
+				self._add_edge_agent3(i, j-1, 1.4142)
 			# DOWN RIGHT (i - nx + 1)
 			j = i - nx
 			if (j+1) >= 0 and (j%nx +1) < nx:
 				self._add_edge(i, j+1, 1.4142)
+				self._add_edge_agent1(i, j+1, 1.4142)
+				self._add_edge_agent3(i, j+1, 1.4142)
 		
 		# add the graph to the render_graph
 		for line in self.render_graph:
@@ -310,8 +421,14 @@ class BoxWorld(object):
 		'''
 		cls = SEARCHES[search]
 		self.path = cls(self.graph, self.start.index, self.target.index, limit)
+		self.path_agent1 = cls(self.graph_agent1, self.start.index, self.target.index, limit)
+		self.path_agent2 = cls(self.graph_agent2, self.start.index, self.target.index, limit)
+		self.path_agent3 = cls(self.graph_agent3, self.start.index, self.target.index, limit)
 		# print the path details
 		print(self.path.report())
+		print(self.path_agent1.report())
+		print(self.path_agent2.report())
+		print(self.path_agent3.report())
 		#then add them to the renderer
 		#render the final path
 		for line in self.render_path:
@@ -319,40 +436,66 @@ class BoxWorld(object):
 				line.delete() #pyglets Line.delete method is slightly broken
 			except:
 				pass
-		p = self.path.path # alias to save us some typing
-		if(len(p) > 1):
-			for idx in range(len(p)-1):
-				self.render_path.append(
-					pyglet.shapes.Line(
-						self.boxes[p[idx]].center().x, 
-						self.boxes[p[idx]].center().y,
-						self.boxes[p[idx+1]].center().x,
-						self.boxes[p[idx+1]].center().y,
-						width=3, 
-						color=COLOUR_NAMES['BLUE'],
-						batch=window.get_batch("path")
+		#for loop to run through 4 seperate agents paths for rendering
+		for i in range(0,4):
+			#if statement to cycle the alias create to save us some typing and duplications
+			if i == 0:
+				p = self.path.path
+				c = COLOUR_NAMES['BLUE']
+			elif i == 1:
+				p = self.path_agent1.path
+				c = COLOUR_NAMES['GREEN']
+			elif i == 2:
+				p = self.path_agent2.path
+				c = COLOUR_NAMES['LIGHT_BLUE']
+			elif i == 3:
+				p = self.path_agent3.path
+				c = COLOUR_NAMES['LIGHT_GREY']
+			
+			if(len(p) > 1):
+				for idx in range(len(p)-1):
+					self.render_path.append(
+						pyglet.shapes.Line(
+							self.boxes[p[idx]].center().x, 
+							self.boxes[p[idx]].center().y,
+							self.boxes[p[idx+1]].center().x,
+							self.boxes[p[idx+1]].center().y,
+							width=3, 
+							color=c,
+							batch=window.get_batch("path")
+						)
 					)
-				)
+		#render the search tree
 		for line in self.render_tree:
 			try:
 				line.delete() #pyglets Line.delete method is slightly broken
 			except:
 				pass
-		#render the search tree
-		t = self.path.route # alias to save us some typing
-		if(len(t) > 1):
-			for start, end in t.items():
-				self.render_tree.append(
-					pyglet.shapes.Line(
-						self.boxes[start].center().x, 
-						self.boxes[start].center().y,
-						self.boxes[end].center().x,
-						self.boxes[end].center().y,
-						width=2, 
-						color=COLOUR_NAMES['PINK'],
-						batch=window.get_batch("tree")
+		#for loop to run through 4 seperate agents routes for rendering
+		for i in range(0,4):
+			#if statement to cycle the alias create to save us some typing and duplications
+			if i == 0:
+				t = self.path.route
+			elif i == 1:
+				t = self.path_agent1.route
+			elif i == 2:
+				t = self.path_agent2.route
+			elif i == 3:
+				t = self.path_agent3.route
+			
+			if(len(t) > 1):
+				for start, end in t.items():
+					self.render_tree.append(
+						pyglet.shapes.Line(
+							self.boxes[start].center().x, 
+							self.boxes[start].center().y,
+							self.boxes[end].center().x,
+							self.boxes[end].center().y,
+							width=2, 
+							color=COLOUR_NAMES['PINK'],
+							batch=window.get_batch("tree")
+						)
 					)
-				)
 		for circle in self.render_open_nodes:
 			try:
 				circle.delete() #pyglets Line.delete method is slightly broken
@@ -360,17 +503,28 @@ class BoxWorld(object):
 				pass
 		#render the nodes that were still on the search stack when the search ended
 		o = self.path.open # alias to save us some typing
-		if(len(o) > 0):
-			for idx in o:
-				self.render_open_nodes.append(
-					pyglet.shapes.Circle(
-						self.boxes[idx].center().x, 
-						self.boxes[idx].center().y,
-						5, 
-						color=COLOUR_NAMES['ORANGE'],
-						batch=window.get_batch("tree")
+		for i in range(0,4):
+			#if statement to cycle the alias create to save us some typing and duplications
+			if i == 0:
+				o = self.path.open
+			elif i == 1:
+				o = self.path_agent1.open
+			elif i == 2:
+				o = self.path_agent2.open
+			elif i == 3:
+				o = self.path_agent3.open
+			
+			if(len(o) > 0):
+				for idx in o:
+					self.render_open_nodes.append(
+						pyglet.shapes.Circle(
+							self.boxes[idx].center().x, 
+							self.boxes[idx].center().y,
+							5, 
+							color=COLOUR_NAMES['ORANGE'],
+							batch=window.get_batch("tree")
+						)
 					)
-				)
 
 
 	@classmethod
