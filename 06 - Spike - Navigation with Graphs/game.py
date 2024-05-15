@@ -7,12 +7,14 @@ from graphics import window
 
 # Mouse mode indicates what the mouse "click" should do...
 class MouseModes(Enum):
-		CLEAR = 	pyglet.window.key._1
+		GRASS = 	pyglet.window.key._1
 		MUD = 		pyglet.window.key._2
 		WATER = 	pyglet.window.key._3
-		WALL = 		pyglet.window.key._4
-		START = 	pyglet.window.key._5
-		TARGET = 	pyglet.window.key._6
+		HILL = 		pyglet.window.key._4
+		ROAD = 		pyglet.window.key._5
+		WALL = 		pyglet.window.key._6
+		START = 	pyglet.window.key._7
+		TARGET = 	pyglet.window.key._8
 
 class SearchModes(Enum):
 		DFS = 		1

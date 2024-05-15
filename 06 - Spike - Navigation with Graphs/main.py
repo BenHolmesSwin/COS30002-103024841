@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		filename = sys.argv[1]
 	else:
-		filename = "map1.txt"
+		filename = "map2.txt"
 
 	game.game = game.Game(filename)
 	pyglet.app.run()
