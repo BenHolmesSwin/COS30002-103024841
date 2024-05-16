@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		filename = sys.argv[1]
 	else:
-		filename = "map2.txt"
+		filename = "map.txt"
 
 	game.game = game.Game(filename)
 	#clock.schedule_interval(graphics.window.on_update(), 1/60)
