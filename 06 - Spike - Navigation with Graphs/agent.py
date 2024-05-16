@@ -178,9 +178,10 @@ class agent(object):
         self.target = self.boxes[idx]
     
     def update(self):
+        steps = 60 # the value of 60 means it travels across an entire move over 60 frames/cycles (how many steps it takes between two moves)
         if self.path == None:
             return   
-        if self.counter == 60:# the value of 60 means it travels across an entire move over 60 frames
+        if self.counter == steps:
             self.counter = 1
             self.move += 1
         if self.move == self.path.path.__len__() - 1:
@@ -189,12 +190,12 @@ class agent(object):
         move_end = self.boxes[self.path.path[self.move + 1]]
         x_change = move_end.center().x - move_start.center().x
         y_change = move_end.center().y - move_start.center().y
-        x = x_change * (self.counter/60) + move_start.center().x
-        y = y_change * (self.counter/60) + move_start.center().y
+        self.x = x_change * (self.counter/steps) + move_start.center().x
+        self.y = y_change * (self.counter/steps) + move_start.center().y
         self.counter += 1
         self.render_agents = pyglet.shapes.Circle(
-                        x, 
-                        y,
+                        self.x, 
+                        self.y,
                         5, 
                         color=self.agent_color,
                         batch=window.get_batch("agents")
