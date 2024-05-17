@@ -110,7 +110,8 @@ def choose_action():
 
             # Do we currently have a "best action" to try? If not, use this one
             if best_action is None:
-                pass
+                best_action = key
+                best_utility = action_utility(best_action,best_goal)
                 ### 1. store the "key" as the current best_action
                 ### ...
                 ### 2. use the "action_utility" function to find the best_utility value of this best_action
@@ -118,7 +119,10 @@ def choose_action():
 
             # Is this new action better than the current action?
             else:
-                pass
+                utility = action_utility(key,best_goal)
+                if(utility > best_utility):
+                    best_action = key
+                    best_utility = utility
                 ### 1. use the "action_utility" function to find the utility value of this action
                 ### ...
                 ### 2. If it's the best action to take (utility > best_utility), keep it! (utility and action)

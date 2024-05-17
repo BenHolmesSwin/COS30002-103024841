@@ -1,0 +1,6 @@
+Ben Holmes - 103024841 - COS30002 - 07.P
+
+- added the needed lines for the if statement in do_action
+- duplicated the file to create the version that doesnt work
+- the version that doesnt work simply had increases to the other goal added to each decrease action causing an infinite loop
+
