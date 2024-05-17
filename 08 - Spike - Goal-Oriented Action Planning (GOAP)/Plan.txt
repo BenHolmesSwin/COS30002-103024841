@@ -1,0 +1,5 @@
+use lab 7 code
+add 3rd ategory, rename others if needed.
+add more actions
+create testing function, loop through how ever many layers i feel (3 atm) doing each action at of that layer in each loaction (1,1,1 -- 1,1,2 -- -- 6,6,6) store all those possible values in array, then pick best path and do it.
+use a recusive function that passes max layer (3) and current layer, increment current layer at start of each level, then compare to max when potentially going down layer.
