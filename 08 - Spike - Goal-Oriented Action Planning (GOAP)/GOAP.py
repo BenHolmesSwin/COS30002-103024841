@@ -1,31 +1,3 @@
-'''Goal Oriented Behaviour
-
-Created for COS30002 AI for Games, Lab,
-by Clinton Woodward <cwoodward@swin.edu.au>
-
-For class use only. Do not publically share or post this code without
-permission.
-
-Works with Python 3+
-
-Simple decision approach.
-* Choose the most pressing goal (highest insistence value)
-* Find the action that fulfills this "goal" the most (ideally?, completely?)
-
-Goal: Eat (initially = 4)
-Goal: Sleep (initially = 3)
-
-Action: get raw food (Eat -= 3)
-Action: get snack (Eat -= 2)
-Action: sleep in bed (Sleep -= 4)
-Action: sleep on sofa (Sleep -= 2)
-
-
-Notes:
-* This version is simply based on dictionaries and functions.
-
-'''
-
 import copy
 
 VERBOSE = True
@@ -134,7 +106,7 @@ def action_paths(path_goals, max_move, counter, path_moves):
             
 
 def path_apply_action(action,path_goals):
-    '''Change all goal values using this action. An action can change multiple
+    '''Change all provided goal values using this action. An action can change multiple
     goals (positive and negative side effects).
     Negative changes are limited to a minimum goal value of 0.
     '''
@@ -178,10 +150,4 @@ def run_until_all_goals_zero():
 
 
 if __name__ == '__main__':
-    # print(actions)
-    # print(actions.items())
-    # for k, v in actions.items():
-    #     print(k,v)
-    # print_actions()
-
     run_until_all_goals_zero()
