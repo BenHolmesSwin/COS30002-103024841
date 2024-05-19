@@ -81,6 +81,9 @@ def choose_action_path():
     pass
 
 def path_check(goal_check,path):
+    best_goal, best_goal_value = max(goals.items(), key=lambda item: item[1])
+    if(goal_check.get(best_goal) > path.goals.get(best_goal)):
+        return True
     if (goal_check.get('Energy') >= path.goals.get('Energy') and goal_check.get('Hunger') >= path.goals.get('Hunger') and goal_check.get('Fitness') >= path.goals.get('Fitness')):
         return True
     else:
