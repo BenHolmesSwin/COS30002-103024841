@@ -3,7 +3,7 @@ import copy
 VERBOSE = True
 
 # Global move depth you wish to path
-move_depth = 3
+move_depth = 4
 
 # Global the amount of moves that the path actually generated ( incase it hits 0,0,0 before hitting depth 3)
 move_amount = 3
@@ -21,7 +21,7 @@ path_chosen = []
 goals = {
     'Energy': 20,
     'Hunger': 20,
-    'Fitness': 20,
+    'Fitness': 20, # fitness still wants to go to 0, really its lack of fitness
 }
 
 # Global (read-only) actions and effects
@@ -72,19 +72,20 @@ def choose_action_path():
         
     move_amount = len(path_chosen.moves) - 1
 
-    apply_action(path_chosen.moves[move_counter])
-    if move_counter == move_amount:
-        move_counter = 0
-    else:
-        move_counter += 1
+    action = path_chosen.moves[move_counter]
+    
 
-    pass
+    apply_action(action)
+    return action
 
 def path_check(goal_check,path):
+    global move_depth
     best_goal, best_goal_value = max(goals.items(), key=lambda item: item[1])
-    if(goal_check.get(best_goal) > path.goals.get(best_goal)):
+    if len(path.moves) < move_depth:
         return True
-    if (goal_check.get('Energy') >= path.goals.get('Energy') and goal_check.get('Hunger') >= path.goals.get('Hunger') and goal_check.get('Fitness') >= path.goals.get('Fitness')):
+    if goal_check.get(best_goal) > path.goals.get(best_goal):
+        return True
+    if goal_check.get('Energy') >= path.goals.get('Energy') and goal_check.get('Hunger') >= path.goals.get('Hunger') and goal_check.get('Fitness') >= path.goals.get('Fitness'):
         return True
     else:
         return False
@@ -126,6 +127,8 @@ def print_actions():
 
 def run_until_all_goals_zero():
     global move_number
+    global move_amount
+    global move_counter
     HR = '-'*40
     print_actions()
     print('>> Start <<')
@@ -148,6 +151,10 @@ def run_until_all_goals_zero():
             running = False
         print(HR)
         move_number += 1
+        if move_counter == move_amount:
+            move_counter = 0
+        else:
+            move_counter += 1
     # finished
     print('>> Done! <<')
 
