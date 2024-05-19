@@ -56,6 +56,7 @@ def choose_action_path():
     assert len(actions) > 0, 'Need at least one action'
     global move_counter
     global path_chosen
+    global move_amount
 
     if move_counter == 0:
         paths = action_paths(goals,move_depth,0,[])
@@ -71,12 +72,8 @@ def choose_action_path():
         path_chosen = paths[path_number]
         
     move_amount = len(path_chosen.moves) - 1
-
-    action = path_chosen.moves[move_counter]
-    
-
-    apply_action(action)
-    return action
+    apply_action(path_chosen.moves[move_counter])
+    return path_chosen.moves[move_counter]
 
 def path_check(goal_check,path):
     global move_depth
