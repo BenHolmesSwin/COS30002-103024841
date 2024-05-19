@@ -2,13 +2,13 @@ import copy
 
 VERBOSE = True
 
-# Global move depth you wish to path
-move_depth = 4
+# Global move depth you wish to path to ( at move depth 6 because of number of paths it generates, lag starts to occur)
+move_depth = 3
 
-# Global the amount of moves that the path actually generated ( incase it hits 0,0,0 before hitting depth 3)
-move_amount = 3
+# Global the amount of moves that the path actually generated ( incase it hits 0,0,0 before hitting move_depth)
+move_amount = 0
 
-# Global move counter to loop through path once paths are generated
+# Global move counter to loop through path moves once path is generated
 move_counter = 0
 
 # Global move number
@@ -21,7 +21,7 @@ path_chosen = []
 goals = {
     'Energy': 20,
     'Hunger': 20,
-    'Fitness': 20, # fitness still wants to go to 0, really its lack of fitness
+    'Fitness': 40, # fitness still wants to go to 0, really its lack of fitness shortened for ease
 }
 
 # Global (read-only) actions and effects
@@ -62,10 +62,12 @@ def choose_action_path():
         paths = action_paths(goals,move_depth,0,[])
         path_number = 0
         goals_check = paths[0].goals.copy()
+        moves_number_check = len(paths[0].moves)
         i = 0
         for path in paths:
-            if path_check(goals_check,path):
+            if path_check(moves_number_check,goals_check,path):
                 path_number = i
+                moves_number_check = len(path.moves)
                 goals_check = path.goals.copy()
             i += 1
 
@@ -75,17 +77,20 @@ def choose_action_path():
     apply_action(path_chosen.moves[move_counter])
     return path_chosen.moves[move_counter]
 
-def path_check(goal_check,path):
+def path_check(moves_number_check, goal_check,path):
     global move_depth
     best_goal, best_goal_value = max(goals.items(), key=lambda item: item[1])
     if len(path.moves) < move_depth:
         return True
-    if goal_check.get(best_goal) > path.goals.get(best_goal):
-        return True
+    elif len(path.moves) > moves_number_check:
+        return False
+    
     if goal_check.get('Energy') >= path.goals.get('Energy') and goal_check.get('Hunger') >= path.goals.get('Hunger') and goal_check.get('Fitness') >= path.goals.get('Fitness'):
         return True
-    else:
-        return False
+    if goal_check.get(best_goal) > path.goals.get(best_goal):
+        return True
+    
+    return False
 
 def action_paths(path_goals, max_move, counter, path_moves):
     counter += 1
