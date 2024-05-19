@@ -39,13 +39,16 @@ move_amount = 3
 # Global move counter to loop through path once paths are generated
 move_counter = 0
 
+# Global move number
+move_number = 1
+
 # Global path chosen
 path_chosen = []
 
 # Global goals with initial values
 goals = {
-    'Energy': 5,
-    'Hunger': 5,
+    'Energy': 10,
+    'Hunger': 10,
     'Fitness': 20,
 }
 
@@ -159,26 +162,20 @@ def choose_action_path():
 
         path_chosen = paths[path_number]
         
-    print(path_chosen.moves)
-    print(path_chosen.goals)
+    print('PATH MOVES:',path_chosen.moves)
+    print('PATH GOALS:',path_chosen.goals)
     move_amount = len(path_chosen.moves) - 1
 
     apply_action(path_chosen.moves[move_counter])
     if move_counter == move_amount:
         move_counter = 0
     else:
-        move_counter +=1
+        move_counter += 1
 
     pass
 
 def path_check(goal_check,path):
-    if (goal_check.get('Energy') > path.goals.get('Energy') and goal_check.get('Hunger') > path.goals.get('Hunger') and goal_check.get('Fitness') > path.goals.get('Fitness')):
-        return True
-    elif (goal_check.get('Energy') > path.goals.get('Energy') and goal_check.get('Hunger') > path.goals.get('Hunger')):
-        return True
-    elif (goal_check.get('Energy') > path.goals.get('Energy') and goal_check.get('Fitness') > path.goals.get('Fitness')):
-        return True
-    elif (goal_check.get('Hunger') > path.goals.get('Hunger') and goal_check.get('Fitness') > path.goals.get('Fitness')):
+    if (goal_check.get('Energy') >= path.goals.get('Energy') and goal_check.get('Hunger') >= path.goals.get('Hunger') and goal_check.get('Fitness') >= path.goals.get('Fitness')):
         return True
     else:
         return False
@@ -221,15 +218,18 @@ def print_actions():
 
 
 def run_until_all_goals_zero():
+    global move_number
     HR = '-'*40
     print_actions()
     print('>> Start <<')
     print(HR)
     running = True
     while running:
+        print('MOVE NUMBER:', move_number)
         print('GOALS:', goals)
         # What is the best action
         action = choose_action_path()
+        print('PATH MOVE NUMBER:', move_counter + 1)
         print('BEST ACTION:', action)
         # Apply the best action
         #apply_action(action)
@@ -238,6 +238,7 @@ def run_until_all_goals_zero():
         if all(value == 0 for goal, value in goals.items()):
             running = False
         print(HR)
+        move_number += 1
     # finished
     print('>> Done! <<')
 
