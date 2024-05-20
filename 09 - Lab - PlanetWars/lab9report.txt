@@ -1,0 +1,13 @@
+Ben Holmes - 103024841 - COS30002 - 09.P
+
+- tested with running the blanko and oneslowmove bots.
+- made blank rando bot, does nothing as expected
+- added random moves to rando bot, used it, worse than slow move as sent small packets of ships pointlessly as expected
+- added best target bot with targeting non player planet with least ships with own planet most ships, wins against rando bot
+
+
+-- noticed an error with the framerate adjustment, not sure why
+File "C:\Users\benho\Documents\Uni-Work\COS30002-103024841\09 - Lab - PlanetWars\sample\PlanetWars\planet_wars_draw.py", line 304, in on_key_press
+    self.set_fps(pyglet.window.fps - 5)
+    ^^^^^^^^^^^^
+AttributeError: 'PlanetWarsWindow' object has no attribute 'set_fps'
