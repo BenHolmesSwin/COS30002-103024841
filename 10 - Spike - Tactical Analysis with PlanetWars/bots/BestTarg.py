@@ -53,5 +53,5 @@ class BestTarg(object):
 			dest = min(gameinfo._not_my_planets().values(), key=lambda p: p.ships)
 			src = max(gameinfo._my_planets().values(), key=lambda p: p.ships)
 			# launch new fleet if there's enough ships
-			if src.ships > 10:
+			if src.ships * 0.75> dest.ships:
 				gameinfo.planet_order(src, dest, int(src.ships * 0.75) )
