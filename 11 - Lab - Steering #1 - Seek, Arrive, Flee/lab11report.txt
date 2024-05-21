@@ -1,0 +1,5 @@
+Ben Holmes - 103024841 - COS30002 - 11.P
+
+- tested program worked
+- added flee lines (which just added revrsed to seek vector)
+- added panic distance (which used vector2D distance function)

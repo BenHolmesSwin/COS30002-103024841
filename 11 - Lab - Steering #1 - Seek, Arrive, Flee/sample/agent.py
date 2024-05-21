@@ -27,10 +27,12 @@ class Agent(object):
     # NOTE: Class Object (not *instance*) variables!
     DECELERATION_SPEEDS = {
         'slow': 0.9,
+        'normal': 0.5,
+        'fast': 0.1,
         ### ADD 'normal' and 'fast' speeds here
     }
 
-    def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
+    def __init__(self, world=None, scale=30.0, mass=2.0, mode='seek'):
         # keep a reference to the world object
         self.world = world
         self.mode = mode
@@ -44,7 +46,7 @@ class Agent(object):
         self.acceleration = Vector2D()  # current steering force
         self.mass = mass
         # limits?
-        self.max_speed = 2500.0
+        self.max_speed = 500.0
         # data for drawing this agent
         self.color = 'ORANGE'
         self.vehicle_shape = [
@@ -68,10 +70,10 @@ class Agent(object):
             accel = self.seek(target_pos)
         elif mode == 'arrive_slow':
             accel = self.arrive(target_pos, 'slow')
-##        elif mode == 'arrive_normal':
-##            force = self.arrive(target_pos, 'normal')
-##        elif mode == 'arrive_fast':
-##            force = self.arrive(target_pos, 'fast')
+        elif mode == 'arrive_normal':
+            accel = self.arrive(target_pos, 'normal')
+        elif mode == 'arrive_fast':
+            accel = self.arrive(target_pos, 'fast')
         elif mode == 'flee':
             accel = self.flee(target_pos)
 ##        elif mode == 'pursuit':
@@ -115,7 +117,9 @@ class Agent(object):
     def flee(self, hunter_pos):
         ''' move away from hunter position '''
 ## add panic distance (second)
-## add flee calculations (first)
+        if self.pos.distance(hunter_pos) < 500:
+            desired_vel = (hunter_pos - self.pos).normalise() * self.max_speed
+            return (desired_vel - self.vel).get_reverse()
         return Vector2D()
 
     def arrive(self, target_pos, speed):
