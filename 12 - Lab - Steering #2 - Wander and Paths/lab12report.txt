@@ -1,0 +1,14 @@
+Ben Holmes - 103024841 - COS30002 - 12.P
+
+- tested program worked with additions from lab 11
+- added path functionality
+- changed _reset() in path to account for no points exsisting on path creation
+- added randomise all agents paths on R press
+- added follow path
+- tested, adjusted waypoint threshold a couple times, got it to 70 as nice balance
+- added wander variables, adjusted max speed to 10.0 * scale and max_force to 100
+- added max_force use
+- added transform_point code
+- added wander code
+- added ability to change max_force and max_speed with up and down arrows after keys are pressed
+            use s key for speed, f key for force

@@ -15,6 +15,11 @@ from math import sin, cos, radians
 from random import random, randrange, uniform
 from path import Path
 
+CHANGE_MODES = {
+	pyglet.window.key.S: 'Speed',
+	pyglet.window.key.F: 'Force',
+}
+
 AGENT_MODES = {
 	pyglet.window.key._1: 'seek',
 	pyglet.window.key._2: 'arrive_slow',
@@ -31,9 +36,8 @@ class Agent(object):
 	# NOTE: Class Object (not *instance*) variables!
 	DECELERATION_SPEEDS = {
 		'slow': 0.9,
-		### ADD 'normal' and 'fast' speeds here
-		# ...
-		# ...
+		'normal': 0.5,
+        'fast': 0.1,
 	}
 
 	def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
@@ -88,19 +92,25 @@ class Agent(object):
 		]
 
 		### path to follow?
-		# self.path = ??
+		self.path = Path()
+		self.randomise_path()
+		self.waypoint_threshold = 70.0
 
 		### wander details
-		# self.wander_?? ...
+		self.wander_target = Vector2D(1, 0)
+		self.wander_dist = 1.0 * scale
+		self.wander_radius = 1.0 * scale
+		self.wander_jitter = 10.0 * scale
+		self.bRadius = scale
 
 		# limits?
-		self.max_speed = 20.0 * scale
-		## max_force ??
+		self.max_speed = 10.0 * scale
+		self.max_force = 100
 
 		# debug draw info?
 		self.show_info = False
 
-	def calculate(self):
+	def calculate(self,delta):
 		# calculate the current steering force
 		mode = self.mode
 		target_pos = Vector2D(self.world.target.x, self.world.target.y)
@@ -129,9 +139,8 @@ class Agent(object):
 		''' update vehicle position and orientation '''
 		# calculate and set self.force to be applied
 		## force = self.calculate()
-		force = self.calculate()  # <-- delta needed for wander
-		## limit force? <-- for wander
-		# ...
+		force = self.calculate(delta)  # <-- delta needed for wander
+		force.truncate(self.max_force)
 		# determin the new acceleration
 		self.accel = force / self.mass  # not needed if mass = 1.0
 		# new velocity
@@ -176,10 +185,9 @@ class Agent(object):
 
 	def flee(self, hunter_pos):
 		''' move away from hunter position '''
-		## add panic distance (second)
-		# ...
-		## add flee calculations (first)
-		# ...
+		if self.pos.distance(hunter_pos) < 500:
+			desired_vel = (hunter_pos - self.pos).normalise() * self.max_speed
+			return (desired_vel - self.vel).get_reverse()
 		return Vector2D()
 
 	def arrive(self, target_pos, speed):
@@ -209,5 +217,52 @@ class Agent(object):
 
 	def wander(self, delta):
 		''' Random wandering using a projected jitter circle. '''
-		## ...
-		return Vector2D()
+		wander_target = self.wander_target
+		# this behaviour is dependent on the update rate, so this line must
+		# be included when using time independent framerate.
+		jitter = self.wander_jitter * delta # this time slice
+		# first, add a small random vector to the target's position
+		wander_target += Vector2D(uniform(-1,1) * jitter, uniform(-1,1) * jitter)
+		# re-project this new vector back on to a unit circle
+		wander_target.normalise()
+		# increase the length of the vector to the same as the radius
+		# of the wander circle
+		wander_target *= self.wander_radius
+		# move the target into a position wander_dist in front of the agent
+		wander_dist_vector = Vector2D(self.wander_dist, 0) #also used for rendering
+		target = wander_target + Vector2D(self.wander_dist, 0)
+		# set the position of the Agent’s debug circle to match the vectors we’ve created
+		circle_pos = self.world.transform_point(wander_dist_vector, self.pos, self.heading, self.side,)
+		self.info_wander_circle.x = circle_pos.x
+		self.info_wander_circle.y = circle_pos.y
+		self.info_wander_circle.radius = self.wander_radius
+		# project the target into world space
+		world_target = self.world.transform_point(target, self.pos, self.heading, self.side)
+		#set the target debug circle position
+		self.info_wander_target.x = world_target.x
+		self.info_wander_target.y = world_target.y
+		# and steer towards it
+		return self.seek(world_target)
+	
+	def randomise_path(self):
+		cx = self.world.cx
+		cy = self.world.cy
+		margin = min(cx, cy) * (1/6)
+		self.path.create_random_path( 5, margin, margin, cx - margin, cy - margin)
+
+	def follow_path(self):
+		if self.path.is_finished():
+			return self.arrive(self.path.current_pt(),'fast')
+		else:
+			if self.pos.distance(self.path.current_pt()) < self.waypoint_threshold:
+				self.path.inc_current_pt()
+			return self.seek(self.path.current_pt())
+	
+	def change_max_force(self,change):
+		self.max_force += change
+	
+	def change_max_force(self,change):
+		self.max_force += change
+
+	def change_max_speed(self,change):
+		self.max_speed += change
