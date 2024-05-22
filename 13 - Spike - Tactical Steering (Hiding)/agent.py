@@ -14,6 +14,7 @@ from graphics import COLOUR_NAMES, window, ArrowLine
 from math import sin, cos, radians
 from random import random, randrange, uniform
 from path import Path
+from HideClasses import HidePoint
 
 CHANGE_MODES = {
 	pyglet.window.key.S: 'Speed',
@@ -29,6 +30,7 @@ AGENT_MODES = {
 	pyglet.window.key._6: 'pursuit',
 	pyglet.window.key._7: 'follow_path',
 	pyglet.window.key._8: 'wander',
+	pyglet.window.key._9: 'hide',
 }
 
 class Agent(object):
@@ -40,7 +42,7 @@ class Agent(object):
         'fast': 0.1,
 	}
 
-	def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek'):
+	def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek', color = 'ORANGE'):
 		# keep a reference to the world object
 		self.world = world
 		self.mode = mode
@@ -56,7 +58,7 @@ class Agent(object):
 		self.mass = mass
 
 		# data for drawing this agent
-		self.color = 'ORANGE'
+		self.color = color
 		self.vehicle_shape = [
 			Point2D(-10,  6),
 			Point2D( 10,  0),
@@ -110,6 +112,9 @@ class Agent(object):
 		# debug draw info?
 		self.show_info = False
 
+		# hide 
+		hide_points = []
+
 	def calculate(self,delta):
 		# calculate the current steering force
 		mode = self.mode
@@ -130,6 +135,8 @@ class Agent(object):
 			force = self.wander(delta)
 		elif mode == 'follow_path':
 			force = self.follow_path()
+		elif mode == 'hide':
+			force = self.hide(self.world.hunter)
 		else:
 			force = Vector2D()
 		self.force = force
@@ -266,3 +273,27 @@ class Agent(object):
 
 	def change_max_speed(self,change):
 		self.max_speed += change
+
+	def hide(self, hunter_pos):
+		distance = 0
+		id = 0
+		counter = 0
+		self.hide_points = []
+		for circle in self.world.circles:
+			hide_pos = ((hunter_pos.pos - circle.pos).normalise() * self.max_speed).get_reverse()
+			#hide_pos.truncate(self.world.circle_radius * 2)
+			pos = hide_pos.copy()
+			self.hide_points.append(
+				HidePoint(
+					pos,
+					pyglet.shapes.Star(
+						pos.x,pos.y,
+						30, 1, 4, 
+						color=COLOUR_NAMES['BLUE'], 
+						batch=window.get_batch("info")
+					)
+				)
+			)
+			
+		hide_point = self.hide_points[id].pos
+		return self.arrive(hide_point,'fast')
