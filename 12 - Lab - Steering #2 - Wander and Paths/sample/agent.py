@@ -266,12 +266,3 @@ class Agent(object):
 
 	def change_max_speed(self,change):
 		self.max_speed += change
-
-	# def hide(self, hunter_pos):
-
-
-
-
-		
-		# hid_point = min(hide_points)
-		# return self.arrive(hide_point,'fast')
