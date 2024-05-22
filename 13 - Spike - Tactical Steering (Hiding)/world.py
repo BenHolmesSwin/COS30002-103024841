@@ -10,7 +10,7 @@ from vector2d import Vector2D
 from matrix33 import Matrix33
 import pyglet
 from graphics import COLOUR_NAMES, window
-from agent import Agent, AGENT_MODES, CHANGE_MODES  # Agent with seek, arrive, flee and pursuit
+from agent import Agent, AGENT_MODES, CHANGE_MODES, AGENT_TYPES  # Agent with seek, arrive, flee and pursuit
 from random import random, randrange, uniform
 from HideClasses import Obstacle
 
@@ -32,12 +32,13 @@ class World(object):
 			batch=window.get_batch("main")
 		)
 		self.change_mode = 'Speed'
+		self.agent_type = 'Agent'
 		self.circles = []
 		self.hunter = Agent(self,mode='wander',color='PURPLE')
 		self.circle_radius = 20
 		i = 0
 		margin = min(self.cx, self.cy) * (1/4)
-		while i < 5:
+		while i < 1:
 			pos = Vector2D(randrange(int(margin), int(self.cx - margin)), randrange(int(margin), int(self.cy - margin)))
 			self.circles.append(
 				Obstacle(
@@ -97,27 +98,45 @@ class World(object):
 		if symbol == pyglet.window.key.P:
 			self.paused = not self.paused
 		elif symbol in AGENT_MODES:
-			for agent in self.agents:
-				agent.mode = AGENT_MODES[symbol]
+			if self.agent_type == 'Agent':
+				for agent in self.agents:
+					agent.mode = AGENT_MODES[symbol]
+			else:
+				self.hunter.mode = AGENT_MODES[symbol]
+		elif symbol in AGENT_TYPES:
+			self.agent_type = AGENT_TYPES[symbol]
 		elif symbol == pyglet.window.key.SPACE:
 			self.agents.append(Agent(self))
 		elif symbol == pyglet.window.key.R:
 			for agent in self.agents:
 				agent.randomise_path()
+			self.hunter.randomise_path()
 		elif symbol in CHANGE_MODES:
 			self.change_mode = CHANGE_MODES[symbol]
 		elif symbol == pyglet.window.key.UP:
-			for agent in self.agents:
+			if self.agent_type == 'Agent':
+				for agent in self.agents:
+					if self.change_mode == 'Force':
+						agent.change_max_force(100)
+					if self.change_mode == 'Speed':
+						agent.change_max_speed(100.0)
+			else:
 				if self.change_mode == 'Force':
-					agent.change_max_force(100)
+					self.hunter.change_max_force(100)
 				if self.change_mode == 'Speed':
-					agent.change_max_speed(100.0)	
+					self.hunter.change_max_speed(100.0)		
 		elif symbol == pyglet.window.key.DOWN:
-			for agent in self.agents:
+			if self.agent_type == 'Agent':
+				for agent in self.agents:
+					if self.change_mode == 'Force':
+						agent.change_max_force(-100)
+					if self.change_mode == 'Speed':
+						agent.change_max_speed(-100.0)
+			else:
 				if self.change_mode == 'Force':
-					agent.change_max_force(-100)
+					self.hunter.change_max_force(-100)
 				if self.change_mode == 'Speed':
-					agent.change_max_speed(-100.0)
+					self.hunter.change_max_speed(-100.0)		
 	
 	def transform_point(self, point, pos, forward, side):
 		''' Transform the given single point, using the provided position,

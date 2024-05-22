@@ -21,6 +21,11 @@ CHANGE_MODES = {
 	pyglet.window.key.F: 'Force',
 }
 
+AGENT_TYPES = {
+	pyglet.window.key.H: 'Hunter',
+	pyglet.window.key.A: 'Agent'
+}
+
 AGENT_MODES = {
 	pyglet.window.key._1: 'seek',
 	pyglet.window.key._2: 'arrive_slow',
@@ -281,8 +286,9 @@ class Agent(object):
 		self.hide_points = []
 		for circle in self.world.circles:
 			hide_pos = ((hunter_pos.pos - circle.pos).normalise() * self.max_speed).get_reverse()
-			#hide_pos.truncate(self.world.circle_radius * 2)
 			pos = hide_pos.copy()
+			pos.truncate(self.world.circle_radius* 2)
+			pos.__iadd__(circle.pos)
 			self.hide_points.append(
 				HidePoint(
 					pos,
