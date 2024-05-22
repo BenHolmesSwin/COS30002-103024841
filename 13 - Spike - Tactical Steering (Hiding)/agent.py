@@ -294,7 +294,7 @@ class Agent(object):
 					pos,
 					pyglet.shapes.Star(
 						pos.x,pos.y,
-						30, 1, 4, 
+						20, 1, 8, 
 						color=COLOUR_NAMES['BLUE'], 
 						batch=window.get_batch("main")
 					)
