@@ -306,4 +306,5 @@ class Agent(object):
 			counter += 1
 			
 		hide_point = self.hide_points[id].pos
+		self.hide_points[id].circle.color = COLOUR_NAMES['PINK']
 		return self.arrive(hide_point,'fast')
