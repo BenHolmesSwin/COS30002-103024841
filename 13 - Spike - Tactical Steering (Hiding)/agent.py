@@ -280,7 +280,7 @@ class Agent(object):
 		self.max_speed += change
 
 	def hide(self, hunter_pos):
-		distance = 0
+		distance = 1000
 		id = 0
 		counter = 0
 		self.hide_points = []
@@ -296,10 +296,14 @@ class Agent(object):
 						pos.x,pos.y,
 						30, 1, 4, 
 						color=COLOUR_NAMES['BLUE'], 
-						batch=window.get_batch("info")
+						batch=window.get_batch("main")
 					)
 				)
 			)
+			if self.pos.distance(pos) < distance:
+				id = counter
+				distance = self.pos.distance(pos)
+			counter += 1
 			
 		hide_point = self.hide_points[id].pos
 		return self.arrive(hide_point,'fast')

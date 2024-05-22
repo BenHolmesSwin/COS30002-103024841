@@ -38,7 +38,7 @@ class World(object):
 		self.circle_radius = 20
 		i = 0
 		margin = min(self.cx, self.cy) * (1/4)
-		while i < 1:
+		while i < 5:
 			pos = Vector2D(randrange(int(margin), int(self.cx - margin)), randrange(int(margin), int(self.cy - margin)))
 			self.circles.append(
 				Obstacle(
