@@ -11,6 +11,7 @@ from matrix33 import Matrix33
 import pyglet
 from graphics import COLOUR_NAMES, window
 from agent import Agent, AGENT_MODES, CHANGE_MODES  # Agent with seek, arrive, flee and pursuit
+from random import random, randrange, uniform
 
 
 class World(object):
@@ -30,7 +31,18 @@ class World(object):
 			batch=window.get_batch("main")
 		)
 		self.change_mode = 'Speed'
-
+		self.circles = []
+		i = 0
+		margin = min(self.cx, self.cy) * (1/4)
+		while i < 5:
+			pos = Vector2D(randrange(int(margin), int(self.cx - margin)), randrange(int(margin), int(self.cy - margin)))
+			self.circles.append(pyglet.shapes.Circle(
+				pos.x,pos.y,
+				20,
+				color=COLOUR_NAMES['GREEN'], 
+				batch=window.get_batch("main")
+			))
+			i += 1
 
 	def update(self, delta):
 		if not self.paused:
