@@ -124,7 +124,7 @@ class Agent(object):
 		# Group behaviour
 		self.tagged = False
 
-	def calculate(self,delta):
+	def calculate(self,delta, radius, wander_amount, seperation_amount,alignment_amount,cohesion_amount):
 		# calculate the current steering force
 		mode = self.mode
 		target_pos = Vector2D(self.world.target.x, self.world.target.y)
@@ -147,17 +147,17 @@ class Agent(object):
 		elif mode == 'hide':
 			force = self.hide(self.world.hunter)
 		elif mode == 'group':
-			force = self.group_movement(delta)
+			force = self.group_movement(delta, radius, wander_amount, seperation_amount,alignment_amount,cohesion_amount)
 		else:
 			force = Vector2D()
 		self.force = force
 		return force
 
-	def update(self, delta):
+	def update(self, delta, wander_amount, seperation_amount,alignment_amount,cohesion_amount, radius):
 		''' update vehicle position and orientation '''
 		# calculate and set self.force to be applied
 		## force = self.calculate()
-		force = self.calculate(delta)  # <-- delta needed for wander
+		force = self.calculate(delta, radius, wander_amount, seperation_amount,alignment_amount,cohesion_amount)  # <-- delta needed for wander
 		force.truncate(self.max_force)
 		# determin the new acceleration
 		self.accel = force / self.mass  # not needed if mass = 1.0
@@ -315,15 +315,15 @@ class Agent(object):
 		self.hide_points[id].circle.color = COLOUR_NAMES['PINK']
 		return self.arrive(hide_point,'fast')
 	
-	def group_movement(self, delta):
-		steering_force = self.wander(delta) * self.world.wander_amount
-		self.tag_neighbours(self.world.agents, self.world.radius)
+	def group_movement(self, delta, radius, wander_amount, seperation_amount,alignment_amount,cohesion_amount):
+		steering_force = self.wander(delta) * wander_amount
+		self.tag_neighbours(self.world.agents, radius)
 		seperation = self.separation(self.world.agents)
-		steering_force += seperation * self.world.seperation_amount
+		steering_force += seperation * seperation_amount
 		alignment = self.alignment(self.world.agents)
-		steering_force += alignment * self.world.alignment_amount
+		steering_force += alignment * alignment_amount
 		cohesion = self.cohesion(self.world.agents)
-		steering_force += cohesion * self.world. cohesion_amount
+		steering_force += cohesion * cohesion_amount
 		return steering_force
 
 

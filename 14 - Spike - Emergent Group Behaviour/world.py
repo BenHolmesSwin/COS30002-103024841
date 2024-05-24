@@ -62,18 +62,21 @@ class World(object):
 		#	i += 1
 
 		# group behaviour
-		self.wander_amount = 1.0
-		self.seperation_amount = 2.0
-		self.cohesion_amount = 3.0
-		self.alignment_amount = 4.0
-		self.radius = 100
+		# inital values
+		wander_amount = 1.0
+		seperation_amount = 1.0
+		cohesion_amount = 1.0
+		alignment_amount = 1.0
+		radius = 10
+
 		self.group_variable_mode = 1 # storage variable for group variable change
-		self.GROUP_VARIABLES = { # used in concert with group_variable_mode to reduce number of lines of code
-			1: self.wander_amount,
-			2: self.seperation_amount,
-			3: self.cohesion_amount,
-			4: self.alignment_amount,
-			5: self.radius,
+		#stored values in dictionary as to not cause issues, it stores ints, but they are initalised as variables for easy understanding of which variable is which
+		self.group_variables = { # used in concert with group_variable_mode to reduce number of lines of code
+			1: wander_amount,
+			2: seperation_amount,
+			3: cohesion_amount,
+			4: alignment_amount,
+			5: radius,
 		}
 		self.group_info = pyglet.text.Label('', x=5, y=self.cy-20, color=COLOUR_NAMES['WHITE'],batch=window.get_batch("label"))
 		self.update_label()
@@ -82,7 +85,7 @@ class World(object):
 		if not self.paused:
 			#self.hunter.update(delta)
 			for agent in self.agents:
-				agent.update(delta)
+				agent.update(delta, self.group_variables[1], self.group_variables[2], self.group_variables[3], self.group_variables[4],self.group_variables[5])
 
 	def wrap_around(self, pos):
 		''' Treat world as a toroidal space. Updates parameter object pos '''
@@ -164,26 +167,27 @@ class World(object):
 					self.hunter.change_max_speed(-100.0)
 		elif symbol == pyglet.window.key.M:
 			self.group_variable_mode += 1
-			if self.group_variable_mode > len(self.GROUP_VARIABLES):
+			if self.group_variable_mode > len(self.group_variables):
 				self.group_variable_mode = 1
 			self.update_label()
 		elif symbol == pyglet.window.key.RIGHT:
 			if self.group_variable_mode == 5:
-				self.GROUP_VARIABLES[self.group_variable_mode] += 100
+				self.group_variables[self.group_variable_mode] += 10
 			else:
-				self.GROUP_VARIABLES[self.group_variable_mode] += 1.0
+				self.group_variables[self.group_variable_mode] += 1.0
 			self.update_label()
 		elif symbol == pyglet.window.key.LEFT:
-			if self.GROUP_VARIABLES[self.group_variable_mode] > 0.0:
+			if self.group_variables[self.group_variable_mode] > 0.0:
 				if self.group_variable_mode == 5:
-					self.GROUP_VARIABLES[self.group_variable_mode] -= 100
+					self.group_variables[self.group_variable_mode] -= 10
 				else:
-					self.GROUP_VARIABLES[self.group_variable_mode] -= 1.0
+					self.group_variables[self.group_variable_mode] -= 1.0
+					
 			self.update_label()
 			
 			
 	def update_label(self):
-		self.group_info.text = GroupLabels(self.group_variable_mode).name +': '+ str(self.GROUP_VARIABLES[self.group_variable_mode])
+		self.group_info.text = GroupLabels(self.group_variable_mode).name +': '+ str(self.group_variables[self.group_variable_mode])
 	
 	def transform_point(self, point, pos, forward, side):
 		''' Transform the given single point, using the provided position,
