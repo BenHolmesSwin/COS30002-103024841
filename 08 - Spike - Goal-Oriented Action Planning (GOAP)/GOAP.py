@@ -3,7 +3,7 @@ import copy
 VERBOSE = True
 
 # Global move depth you wish to path to ( at move depth 6 because of number of paths it generates, lag starts to occur)
-move_depth = 3
+move_depth = 4
 
 # Global the amount of moves that the path actually generated ( incase it hits 0,0,0 before hitting move_depth)
 move_amount = 0

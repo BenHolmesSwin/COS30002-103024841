@@ -116,7 +116,6 @@ class Agent(object):
 
     def flee(self, hunter_pos):
         ''' move away from hunter position '''
-## add panic distance (second)
         if self.pos.distance(hunter_pos) < 500:
             desired_vel = (hunter_pos - self.pos).normalise() * self.max_speed
             return (desired_vel - self.vel).get_reverse()
