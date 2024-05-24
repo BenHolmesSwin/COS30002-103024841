@@ -170,6 +170,11 @@ class World(object):
 			if self.group_variable_mode > len(self.group_variables):
 				self.group_variable_mode = 1
 			self.update_label()
+		elif symbol == pyglet.window.key.N:
+			self.group_variable_mode -= 1
+			if self.group_variable_mode < 1:
+				self.group_variable_mode = len(self.group_variables)
+			self.update_label()
 		elif symbol == pyglet.window.key.RIGHT:
 			if self.group_variable_mode == 5:
 				self.group_variables[self.group_variable_mode] += 10
@@ -182,7 +187,6 @@ class World(object):
 					self.group_variables[self.group_variable_mode] -= 10
 				else:
 					self.group_variables[self.group_variable_mode] -= 1.0
-					
 			self.update_label()
 			
 			

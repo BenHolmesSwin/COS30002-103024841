@@ -326,8 +326,6 @@ class Agent(object):
 		steering_force += cohesion * cohesion_amount
 		return steering_force
 
-
-
 	def tag_neighbours(self,agents,radius):
 		 # lets find 'em
 		for agent in agents:
