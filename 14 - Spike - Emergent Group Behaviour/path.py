@@ -99,13 +99,13 @@ class Path(object):
             Also updates the path renderable.'''
         self._cur_pt_idx = 0
         self._num_pts = len(self._pts)
-        if self._num_pts > 1:
-            self.renderable = PolyLine(
-                self._pts,
-                colour=COLOUR_NAMES['PINK'],
-                batch=window.get_batch("info"),
-                closed=self.looped
-            )
+        #if self._num_pts > 1:
+        #    self.renderable = PolyLine(
+        #        self._pts,
+        #        colour=COLOUR_NAMES['PINK'],
+        #        batch=window.get_batch("info"),
+        #        closed=self.looped
+        #    )
 
 
     def clear(self):

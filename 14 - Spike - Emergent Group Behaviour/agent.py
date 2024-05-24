@@ -36,6 +36,7 @@ AGENT_MODES = {
 	pyglet.window.key._7: 'follow_path',
 	pyglet.window.key._8: 'wander',
 	pyglet.window.key._9: 'hide',
+	pyglet.window.key._0: 'group',
 }
 
 class Agent(object):
@@ -78,7 +79,7 @@ class Agent(object):
 		)
 
 		# wander info render objects
-		self.info_wander_circle = pyglet.shapes.Circle(0, 0, 0, color=COLOUR_NAMES['WHITE'], batch=window.get_batch("info"))
+		#self.info_wander_circle = pyglet.shapes.Circle(0, 0, 0, color=COLOUR_NAMES['WHITE'], batch=window.get_batch("info"))
 		self.info_wander_target = pyglet.shapes.Circle(0, 0, 0, color=COLOUR_NAMES['GREEN'], batch=window.get_batch("info"))
 		# add some handy debug drawing info lines - force and velocity
 		self.info_force_vector = ArrowLine(Vector2D(0,0), Vector2D(0,0), colour=COLOUR_NAMES['BLUE'], batch=window.get_batch("info"))
@@ -118,7 +119,10 @@ class Agent(object):
 		self.show_info = False
 
 		# hide 
-		hide_points = []
+		self.hide_points = []
+
+		# Group behaviour
+		self.tagged = False
 
 	def calculate(self,delta):
 		# calculate the current steering force
@@ -142,6 +146,8 @@ class Agent(object):
 			force = self.follow_path()
 		elif mode == 'hide':
 			force = self.hide(self.world.hunter)
+		elif mode == 'group':
+			force = self.group_movement(delta)
 		else:
 			force = Vector2D()
 		self.force = force
@@ -245,9 +251,9 @@ class Agent(object):
 		target = wander_target + Vector2D(self.wander_dist, 0)
 		# set the position of the Agent’s debug circle to match the vectors we’ve created
 		circle_pos = self.world.transform_point(wander_dist_vector, self.pos, self.heading, self.side,)
-		self.info_wander_circle.x = circle_pos.x
-		self.info_wander_circle.y = circle_pos.y
-		self.info_wander_circle.radius = self.wander_radius
+		#self.info_wander_circle.x = circle_pos.x
+		#self.info_wander_circle.y = circle_pos.y
+		#self.info_wander_circle.radius = self.wander_radius
 		# project the target into world space
 		world_target = self.world.transform_point(target, self.pos, self.heading, self.side)
 		#set the target debug circle position
@@ -308,3 +314,62 @@ class Agent(object):
 		hide_point = self.hide_points[id].pos
 		self.hide_points[id].circle.color = COLOUR_NAMES['PINK']
 		return self.arrive(hide_point,'fast')
+	
+	def group_movement(self, delta):
+		steering_force = self.wander(delta) * self.world.wander_amount
+		self.tag_neighbours(self.world.agents, self.world.radius)
+		seperation = self.separation(self.world.agents)
+		steering_force += seperation * self.world.seperation_amount
+		alignment = self.alignment(self.world.agents)
+		steering_force += alignment * self.world.alignment_amount
+		cohesion = self.cohesion(self.world.agents)
+		steering_force += cohesion * self.world. cohesion_amount
+		return steering_force
+
+
+
+	def tag_neighbours(self,agents,radius):
+		 # lets find 'em
+		for agent in agents:
+			# untag all first
+			agent.tagged = False
+			# get the vector between us
+			to = self.pos - agent.pos
+			if to.length() < radius:
+				agent.tagged = True
+				
+	def separation(self,group):
+		steering_force = Vector2D()
+		for agent in group:
+			# don’t include self, only include neighbours (already tagged)
+			if agent != self and agent.tagged:
+				to_agent = self.pos - agent.pos
+				# scale based on inverse distance to neighbour
+				steering_force += to_agent.normalise() / to_agent.length()
+			return steering_force
+		
+	def alignment(self, group):
+		avg_heading = Vector2D()
+		avg_count = 0
+		for agent in group:
+			if agent != self and agent.tagged:
+				avg_heading += agent.heading
+				avg_count += 1
+		
+		if avg_count > 0:
+			avg_heading /= float(avg_count)
+			avg_heading -= self.heading
+		return avg_heading
+	
+	def cohesion(self,group):
+		centre_mass = Vector2D()
+		steering_force = Vector2D()
+		avg_count = 0
+		for agent in group:
+			if agent != self and agent.tagged:
+				centre_mass += agent.pos
+				avg_count += 1
+		if avg_count > 0:
+			centre_mass /= float(avg_count)
+			steering_force = self.seek(centre_mass)
+		return steering_force 

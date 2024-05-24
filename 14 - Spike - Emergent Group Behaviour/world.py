@@ -5,7 +5,7 @@ Created for COS30002 AI for Games by Clinton Woodward <cwoodward@swin.edu.au>
 For class use only. Do not publically share or post this code without permission.
 
 '''
-
+from enum import Enum
 from vector2d import Vector2D
 from matrix33 import Matrix33
 import pyglet
@@ -14,6 +14,12 @@ from agent import Agent, AGENT_MODES, CHANGE_MODES, AGENT_TYPES  # Agent with se
 from random import random, randrange, uniform
 from HideClasses import Obstacle
 
+class GroupLabels(Enum):
+		Wander_Amount =		1
+		Seperation_Amount =	2
+		Cohesion_Amount =	3
+		Alignment_Amount =	4
+		Radius = 5
 
 class World(object):
 
@@ -25,12 +31,14 @@ class World(object):
 		self.agents = []
 		self.paused = True
 		self.show_info = True
+		
 		self.target = pyglet.shapes.Star(
 			cx / 2, cy / 2, 
 			30, 1, 4, 
 			color=COLOUR_NAMES['RED'], 
 			batch=window.get_batch("main")
 		)
+		
 		self.change_mode = 'Speed'
 		self.agent_type = 'Agent'
 		self.circles = []
@@ -52,6 +60,23 @@ class World(object):
 		#		)
 		#	)
 		#	i += 1
+
+		# group behaviour
+		self.wander_amount = 1.0
+		self.seperation_amount = 2.0
+		self.cohesion_amount = 3.0
+		self.alignment_amount = 4.0
+		self.radius = 100
+		self.group_variable_mode = 1 # storage variable for group variable change
+		self.GROUP_VARIABLES = { # used in concert with group_variable_mode to reduce number of lines of code
+			1: self.wander_amount,
+			2: self.seperation_amount,
+			3: self.cohesion_amount,
+			4: self.alignment_amount,
+			5: self.radius,
+		}
+		self.group_info = pyglet.text.Label('', x=5, y=self.cy-20, color=COLOUR_NAMES['WHITE'],batch=window.get_batch("label"))
+		self.update_label()
 
 	def update(self, delta):
 		if not self.paused:
@@ -136,7 +161,29 @@ class World(object):
 				if self.change_mode == 'Force':
 					self.hunter.change_max_force(-100)
 				if self.change_mode == 'Speed':
-					self.hunter.change_max_speed(-100.0)		
+					self.hunter.change_max_speed(-100.0)
+		elif symbol == pyglet.window.key.M:
+			self.group_variable_mode += 1
+			if self.group_variable_mode > len(self.GROUP_VARIABLES):
+				self.group_variable_mode = 1
+			self.update_label()
+		elif symbol == pyglet.window.key.RIGHT:
+			if self.group_variable_mode == 5:
+				self.GROUP_VARIABLES[self.group_variable_mode] += 100
+			else:
+				self.GROUP_VARIABLES[self.group_variable_mode] += 1.0
+			self.update_label()
+		elif symbol == pyglet.window.key.LEFT:
+			if self.GROUP_VARIABLES[self.group_variable_mode] > 0.0:
+				if self.group_variable_mode == 5:
+					self.GROUP_VARIABLES[self.group_variable_mode] -= 100
+				else:
+					self.GROUP_VARIABLES[self.group_variable_mode] -= 1.0
+			self.update_label()
+			
+			
+	def update_label(self):
+		self.group_info.text = GroupLabels(self.group_variable_mode).name +': '+ str(self.GROUP_VARIABLES[self.group_variable_mode])
 	
 	def transform_point(self, point, pos, forward, side):
 		''' Transform the given single point, using the provided position,

@@ -418,7 +418,8 @@ class GameWindow(pyglet.window.Window):
 		#and allow us to efficiently turn on and off rendering groups of primitives
 		self.batches = {
 			"main": pyglet.graphics.Batch(),
-			"info": pyglet.graphics.Batch()
+			"info": pyglet.graphics.Batch(),
+			"label": pyglet.graphics.Batch()
 		}
 		self.labels = {
 			'mode':	pyglet.text.Label('', x=200, y=self.height-20, color=COLOUR_NAMES['WHITE']),
@@ -461,6 +462,7 @@ class GameWindow(pyglet.window.Window):
 		def on_draw():
 			self.clear()
 			self.batches["main"].draw()
+			self.batches["label"].draw()
 			if self.cfg['INFO']:
 				self.batches["info"].draw()
 			self.fps_display.draw()
