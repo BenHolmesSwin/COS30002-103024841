@@ -15,6 +15,7 @@ from math import sin, cos, radians
 from random import random, randrange, uniform
 from path import Path
 from HideClasses import HidePoint
+from bullet import Bullet
 
 CHANGE_MODES = {
 	pyglet.window.key.S: 'Speed',
@@ -36,6 +37,10 @@ AGENT_MODES = {
 	pyglet.window.key._7: 'follow_path',
 	pyglet.window.key._8: 'wander',
 	pyglet.window.key._9: 'hide',
+	pyglet.window.key._0: 'patrol',
+	# dont press, here to be part of the list, button functionality not implemented
+	pyglet.window.key.NUM_0: 'hold', 
+	pyglet.window.key.NUM_ENTER: 'shoot',
 }
 
 class Agent(object):
@@ -111,14 +116,22 @@ class Agent(object):
 		self.bRadius = scale
 
 		# limits?
-		self.max_speed = 10.0 * scale
-		self.max_force = 100
+		self.max_speed = 5.0 * scale
+		self.max_force = 1000
 
 		# debug draw info?
 		self.show_info = False
 
 		# hide 
-		hide_points = []
+		self.hide_points = []
+
+		#shoot
+		self.been_hit = False
+		self.hit_timer = 0
+		self.hit_lifetime = 120
+
+		#patrol
+		self.patrol_couter = 0
 
 	def calculate(self,delta):
 		# calculate the current steering force
@@ -142,6 +155,12 @@ class Agent(object):
 			force = self.follow_path()
 		elif mode == 'hide':
 			force = self.hide(self.world.hunter)
+		elif mode == 'patrol':
+			force = self.patrol()
+		elif mode == 'hold':
+			force = Vector2D()
+		elif mode == 'shoot':
+			force = self.shoot(self.world.target_agent,self.world.bullet_mode)
 		else:
 			force = Vector2D()
 		self.force = force
@@ -184,6 +203,8 @@ class Agent(object):
 		self.info_net_vectors[0].end_pos = self.pos + (self.force+self.vel) * s
 		self.info_net_vectors[1].position = self.pos
 		self.info_net_vectors[1].end_pos = self.pos + (self.force+self.vel) * s
+		if self.been_hit:
+			self.hit()
 
 	def speed(self):
 		return self.vel.length()
@@ -308,3 +329,31 @@ class Agent(object):
 		hide_point = self.hide_points[id].pos
 		self.hide_points[id].circle.color = COLOUR_NAMES['PINK']
 		return self.arrive(hide_point,'fast')
+	
+	def shoot(self,target,bullet_mode):
+		to_target = target.pos - self.pos
+		bullet_speed = 200
+		if bullet_mode == 3 or bullet_mode == 4:
+			bullet_speed = 100
+		look_ahead_time = to_target.length()/(bullet_speed + target.Speed())
+		predicted_pos = target.pos + target.vel * look_ahead_time
+		self.world.bullets.append(Bullet(self.world,self.pos,predicted_pos,bullet_mode))
+		self.mode = 'hold'
+		return Vector2D()
+
+	def patrol(self):
+		target = self.world.patrol[self.patrol_couter]
+		target_vel = self.seek(target)
+		if self.pos.distance(target) < 10:
+			self.patrol_couter += 1
+			if self.patrol_couter >= len(self.world.patrol):
+				self.patrol_couter = 0
+		return target_vel
+	
+	def hit(self):
+		self.vehicle.color = COLOUR_NAMES['BLUE']
+		self.hit_timer +=1
+		if self.hit_timer > self.hit_lifetime:
+			self.been_hit = False
+			self.vehicle.color = COLOUR_NAMES['ORANGE']
+			self.hit_timer = 0

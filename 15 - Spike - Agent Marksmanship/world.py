@@ -13,7 +13,7 @@ from graphics import COLOUR_NAMES, window
 from agent import Agent, AGENT_MODES, CHANGE_MODES, AGENT_TYPES  # Agent with seek, arrive, flee and pursuit
 from random import random, randrange, uniform
 from HideClasses import Obstacle
-
+from bullet import BULLET_MODES, BULLET_MODES_SET
 
 class World(object):
 
@@ -26,7 +26,7 @@ class World(object):
 		self.paused = True
 		self.show_info = True
 		self.target = pyglet.shapes.Star(
-			cx / 2, cy / 2, 
+			30,30,#cx / 2, cy / 2, 
 			30, 1, 4, 
 			color=COLOUR_NAMES['RED'], 
 			batch=window.get_batch("main")
@@ -34,30 +34,52 @@ class World(object):
 		self.change_mode = 'Speed'
 		self.agent_type = 'Agent'
 		self.circles = []
-		self.hunter = Agent(self,mode='wander',color='PURPLE')
+		
 		self.circle_radius = 20
-		i = 0
-		margin = min(self.cx, self.cy) * (1/4)
-		while i < 5:
-			pos = Vector2D(randrange(int(margin), int(self.cx - margin)), randrange(int(margin), int(self.cy - margin)))
-			self.circles.append(
-				Obstacle(
-					pos,
-					pyglet.shapes.Circle(
-						pos.x,pos.y,
-						self.circle_radius,
-						color=COLOUR_NAMES['GREEN'], 
-						batch=window.get_batch("main")
-					)
-				)
-			)
-			i += 1
+		#i = 0
+		#margin = min(self.cx, self.cy) * (1/4)
+		#while i < 5:
+		#	pos = Vector2D(randrange(int(margin), int(self.cx - margin)), randrange(int(margin), int(self.cy - margin)))
+		#	self.circles.append(
+		#		Obstacle(
+		#			pos,
+		#			pyglet.shapes.Circle(
+		#				pos.x,pos.y,
+		#				self.circle_radius,
+		#				color=COLOUR_NAMES['GREEN'], 
+		#				batch=window.get_batch("main")
+		#			)
+		#		)
+		#	)
+		#	i += 1
+		
+		
+		self.bullets = []
+		self.bullet_mode = BULLET_MODES['rifle']
+		self.hunter = Agent(self,mode='hold',color='PURPLE')
+		self.hunter.pos = Vector2D(cx / 2, cy / 2)
+		self.hunter.vel = Vector2D()
+
+		self.patrol = []
+		self.patrol.append(Vector2D(100,700))
+		self.patrol.append(Vector2D(700,700))
+		self.target_agent = Agent(self,mode='patrol',color='ORANGE')
 
 	def update(self, delta):
 		if not self.paused:
 			self.hunter.update(delta)
 			for agent in self.agents:
 				agent.update(delta)
+			self.target_agent.update(delta)
+			active_bullets = [] # this is to replace list of current bullets after list is checked
+			for bullet in self.bullets:
+				bullet.update()
+				if bullet.check_hit():
+					self.target_agent.been_hit = True
+					self.target_agent.hit_timer = 0
+				elif bullet.check_lifetime():
+					active_bullets.append(bullet)
+			self.bullets = active_bullets
 
 	def wrap_around(self, pos):
 		''' Treat world as a toroidal space. Updates parameter object pos '''
@@ -103,6 +125,8 @@ class World(object):
 					agent.mode = AGENT_MODES[symbol]
 			else:
 				self.hunter.mode = AGENT_MODES[symbol]
+		elif symbol in BULLET_MODES_SET:
+			self.bullet_mode = BULLET_MODES[BULLET_MODES_SET[symbol]]
 		elif symbol in AGENT_TYPES:
 			self.agent_type = AGENT_TYPES[symbol]
 		elif symbol == pyglet.window.key.SPACE:
@@ -136,7 +160,9 @@ class World(object):
 				if self.change_mode == 'Force':
 					self.hunter.change_max_force(-100)
 				if self.change_mode == 'Speed':
-					self.hunter.change_max_speed(-100.0)		
+					self.hunter.change_max_speed(-100.0)
+		elif symbol == pyglet.window.key.NUM_SUBTRACT:
+			self.hunter.mode = 'shoot'	
 	
 	def transform_point(self, point, pos, forward, side):
 		''' Transform the given single point, using the provided position,
