@@ -44,10 +44,16 @@ class Bullet(object):
             self.speed = BULLET_SPEEDS['slow']
             self.mode = BULLET_MODES['grenade']
             self.inaccuracy = True
-
+        
         self.vel = (target_pos - self.pos).normalise() * self.speed
         self.heading = self.vel.get_normalised()
 
+        self.predicted = pyglet.shapes.Star(
+			self.target.x,self.target.y,
+			30, 1, 4, 
+			color=COLOUR_NAMES['GREEN'], 
+			batch=window.get_batch("main")
+		)
         self.vehicle_shape = [
 			Point2D( 0,  6),
 			Point2D( 10,  0),
@@ -63,11 +69,11 @@ class Bullet(object):
 		)
 
         self.lifetime = 0
-        self.max_lifetime = 1000
+        self.max_lifetime = (200/self.speed)* 200
 
     def update(self,delta):
         self.pos += self.vel * delta
-
+        self.world.wrap_around(self.pos)
         self.vehicle.x = self.pos.x+self.vehicle_shape[0].x
         self.vehicle.y = self.pos.y+self.vehicle_shape[0].y
         self.vehicle.rotation = -self.heading.angle_degrees()
@@ -75,7 +81,7 @@ class Bullet(object):
 
     def check_hit(self):
         '''checks if it has hit the target could be changed to provide a specific target to check against rather than the single targe_agent'''
-        if self.pos.distance(self.world.target_agent) < 10:
+        if self.pos.distance(self.world.target_agent.pos) < 10:
             return True
         return False
 

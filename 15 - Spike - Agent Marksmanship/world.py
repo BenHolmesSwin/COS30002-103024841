@@ -73,7 +73,7 @@ class World(object):
 			self.target_agent.update(delta)
 			active_bullets = [] # this is to replace list of current bullets after list is checked
 			for bullet in self.bullets:
-				bullet.update()
+				bullet.update(delta)
 				if bullet.check_hit():
 					self.target_agent.been_hit = True
 					self.target_agent.hit_timer = 0

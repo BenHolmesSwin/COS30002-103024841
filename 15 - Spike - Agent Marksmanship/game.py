@@ -10,7 +10,7 @@ class Game():
 	def __init__(self):
 		self.world = World(window.size[0], window.size[1])
 		# add one agent
-		#self.world.agents.append(Agent(self.world))
+		# self.world.agents.append(Agent(self.world))
 		# unpause the world ready for movement
 		self.world.paused = False
 

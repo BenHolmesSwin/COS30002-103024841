@@ -15,7 +15,7 @@ from math import sin, cos, radians
 from random import random, randrange, uniform
 from path import Path
 from HideClasses import HidePoint
-from bullet import Bullet
+from bullet import Bullet, BULLET_SPEEDS
 
 CHANGE_MODES = {
 	pyglet.window.key.S: 'Speed',
@@ -128,7 +128,7 @@ class Agent(object):
 		#shoot
 		self.been_hit = False
 		self.hit_timer = 0
-		self.hit_lifetime = 120
+		self.hit_lifetime = 60
 
 		#patrol
 		self.patrol_couter = 0
@@ -331,13 +331,14 @@ class Agent(object):
 		return self.arrive(hide_point,'fast')
 	
 	def shoot(self,target,bullet_mode):
-		to_target = target.pos - self.pos
-		bullet_speed = 200
+		to_target = self.pos.distance(target.pos)
+		bullet_speed = BULLET_SPEEDS['fast']
 		if bullet_mode == 3 or bullet_mode == 4:
-			bullet_speed = 100
-		look_ahead_time = to_target.length()/(bullet_speed + target.Speed())
+			bullet_speed = BULLET_SPEEDS['slow']
+		look_ahead_time = to_target/(bullet_speed + target.speed())
 		predicted_pos = target.pos + target.vel * look_ahead_time
-		self.world.bullets.append(Bullet(self.world,self.pos,predicted_pos,bullet_mode))
+		bullet_start_pos = self.pos.copy()
+		self.world.bullets.append(Bullet(self.world,bullet_start_pos,predicted_pos,bullet_mode))
 		self.mode = 'hold'
 		return Vector2D()
 
