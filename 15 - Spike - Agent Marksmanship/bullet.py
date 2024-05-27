@@ -6,8 +6,8 @@ from math import sin, cos, radians
 from random import random, randrange, uniform
 
 BULLET_SPEEDS = {
-        'slow': 100,
-        'fast': 200,
+        'slow': 200,
+        'fast': 400,
     }
 
 BULLET_MODES = {
@@ -47,6 +47,13 @@ class Bullet(object):
         
         self.vel = (target_pos - self.pos).normalise() * self.speed
         self.heading = self.vel.get_normalised()
+
+        if self.inaccuracy:
+            inaccuracy_amount = randrange(1,10)/100 # makes the inacuracy be between 1% and 10% of the perp of current vel
+            inaccuracy_sign = 1 # makes inaccuracy either positive or negative randomly
+            if randrange(1,10) > 5:
+                inaccuracy_sign = -1
+            self.vel = self.vel + self.vel.perp() * inaccuracy_amount * inaccuracy_sign
 
         self.predicted = pyglet.shapes.Star(
 			self.target.x,self.target.y,

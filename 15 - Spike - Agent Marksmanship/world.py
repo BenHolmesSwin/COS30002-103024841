@@ -67,10 +67,10 @@ class World(object):
 
 	def update(self, delta):
 		if not self.paused:
-			self.hunter.update(delta)
 			for agent in self.agents:
 				agent.update(delta)
 			self.target_agent.update(delta)
+			self.hunter.update(delta)
 			active_bullets = [] # this is to replace list of current bullets after list is checked
 			for bullet in self.bullets:
 				bullet.update(delta)

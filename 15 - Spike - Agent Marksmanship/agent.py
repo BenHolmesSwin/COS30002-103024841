@@ -116,7 +116,7 @@ class Agent(object):
 		self.bRadius = scale
 
 		# limits?
-		self.max_speed = 5.0 * scale
+		self.max_speed = 3.0 * scale
 		self.max_force = 1000
 
 		# debug draw info?
@@ -332,17 +332,23 @@ class Agent(object):
 	
 	def shoot(self,target,bullet_mode):
 		to_target = self.pos.distance(target.pos)
+		depth = 4 #how many iterations it does for prediction accuracy purposes
 		bullet_speed = BULLET_SPEEDS['fast']
 		if bullet_mode == 3 or bullet_mode == 4:
 			bullet_speed = BULLET_SPEEDS['slow']
-		look_ahead_time = to_target/(bullet_speed + target.speed())
+		i = 0# iteration
+		while i < depth:
+			look_ahead_time = to_target/bullet_speed
+			to_target = self.pos.distance(target.pos + target.vel * look_ahead_time)
+			i+=1
 		predicted_pos = target.pos + target.vel * look_ahead_time
 		bullet_start_pos = self.pos.copy()
 		self.world.bullets.append(Bullet(self.world,bullet_start_pos,predicted_pos,bullet_mode))
-		self.mode = 'hold'
+		self.mode = 'hold' #switch off shoot mode to only have one shot fired
 		return Vector2D()
 
 	def patrol(self):
+		'''patrols between a patrol point list in order, looping'''
 		target = self.world.patrol[self.patrol_couter]
 		target_vel = self.seek(target)
 		if self.pos.distance(target) < 10:
@@ -352,6 +358,7 @@ class Agent(object):
 		return target_vel
 	
 	def hit(self):
+		'''controls hit coloring and duration of color change'''
 		self.vehicle.color = COLOUR_NAMES['BLUE']
 		self.hit_timer +=1
 		if self.hit_timer > self.hit_lifetime:
