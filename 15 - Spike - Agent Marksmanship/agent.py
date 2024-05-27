@@ -15,7 +15,7 @@ from math import sin, cos, radians
 from random import random, randrange, uniform
 from path import Path
 from HideClasses import HidePoint
-from bullet import Bullet, BULLET_SPEEDS
+from bullet import Bullet, BULLET_SPEEDS, BULLET_MODES
 
 CHANGE_MODES = {
 	pyglet.window.key.S: 'Speed',
@@ -334,9 +334,9 @@ class Agent(object):
 		to_target = self.pos.distance(target.pos)
 		depth = 4 #how many iterations it does for prediction accuracy purposes
 		bullet_speed = BULLET_SPEEDS['fast']
-		if bullet_mode == 3 or bullet_mode == 4:
+		if bullet_mode == BULLET_MODES['pistol'] or bullet_mode == BULLET_MODES['grenade']:
 			bullet_speed = BULLET_SPEEDS['slow']
-		i = 0# iteration
+		i = 0 # iteration counter
 		while i < depth:
 			look_ahead_time = to_target/bullet_speed
 			to_target = self.pos.distance(target.pos + target.vel * look_ahead_time)

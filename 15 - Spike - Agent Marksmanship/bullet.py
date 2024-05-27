@@ -33,16 +33,13 @@ class Bullet(object):
         self.inaccuracy = False
         self.color = 'RED'
         self.speed = BULLET_SPEEDS['fast']
-        self.mode = BULLET_MODES['rifle']
-        if mode == 2:
-            self.mode = BULLET_MODES['rocket']
+        self.mode = mode
+        if mode == BULLET_MODES['rocket']:
             self.inaccuracy = True
-        elif mode == 3:
+        elif mode == BULLET_MODES['pistol']:
             self.speed = BULLET_SPEEDS['slow']
-            self.mode = BULLET_MODES['pistol']
-        elif mode == 4:
+        elif mode == BULLET_MODES['grenade']:
             self.speed = BULLET_SPEEDS['slow']
-            self.mode = BULLET_MODES['grenade']
             self.inaccuracy = True
         
         self.vel = (target_pos - self.pos).normalise() * self.speed
@@ -57,7 +54,7 @@ class Bullet(object):
 
         self.predicted = pyglet.shapes.Star(
 			self.target.x,self.target.y,
-			30, 1, 4, 
+			10, 1, 4, 
 			color=COLOUR_NAMES['GREEN'], 
 			batch=window.get_batch("main")
 		)
