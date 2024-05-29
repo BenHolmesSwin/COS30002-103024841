@@ -131,6 +131,15 @@ class Agent(object):
 		self.hit_lifetime = 60
 
 	#patrol
+		self.patrol_points = []
+		left_x = randrange(100,300)
+		right_x = randrange(600,700)
+		top_y = randrange(600,700)
+		bottom_y = randrange(100,300)
+		self.patrol_points.append(Vector2D(left_x,top_y))# random point in top left corner
+		self.patrol_points.append(Vector2D(right_x,top_y))# random point in top right corner
+		self.patrol_points.append(Vector2D(left_x,bottom_y))# random point in bottom left corner
+		self.patrol_points.append(Vector2D(right_x,bottom_y))# random point in bottom right corner
 		self.patrol_couter = 0
 
 	# soldier
@@ -369,13 +378,13 @@ class Agent(object):
 	def patrol(self):
 		'''patrols between a patrol point list in order, looping'''
 		# patroling
-		target = self.world.patrol[self.patrol_couter]
+		target = self.patrol_points[self.patrol_couter]
 		target_vel = self.seek(target)
 		if self.pos.distance(target) < 10:
 			self.patrol_couter += 1
-			if self.patrol_couter >= len(self.world.patrol):
+			if self.patrol_couter >= len(self.patrol_points):
 				self.patrol_couter = 0
-		# attacking descision
+		# attacking decision 
 		if self.world.target_agent != None:
 			self.mode = 'attack'
 		return target_vel

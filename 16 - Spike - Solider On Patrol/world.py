@@ -60,11 +60,7 @@ class World(object):
 		self.hunter.pos = Vector2D(cx / 2, cy / 2)
 		self.hunter.vel = Vector2D()
 
-		self.patrol = []
-		self.patrol.append(Vector2D(randrange(100,300),randrange(600,700)))# random point in top left corner
-		self.patrol.append(Vector2D(randrange(600,700),randrange(600,700)))# random point in top right corner
-		self.patrol.append(Vector2D(randrange(100,300),randrange(100,300)))# random point in bottom left corner
-		self.patrol.append(Vector2D(randrange(600,700),randrange(100,300)))# random point in bottom right corner
+		
 		
 		self.target_agent = None
 
