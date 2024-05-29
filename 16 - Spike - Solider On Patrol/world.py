@@ -56,28 +56,32 @@ class World(object):
 		
 		self.bullets = []
 		self.bullet_mode = BULLET_MODES['rifle']
-		self.hunter = Agent(self,mode='hold',color='PURPLE')
+		self.hunter = Agent(self,mode='patrol',color='PURPLE')
 		self.hunter.pos = Vector2D(cx / 2, cy / 2)
 		self.hunter.vel = Vector2D()
 
 		self.patrol = []
-		self.patrol.append(Vector2D(100,700))
-		self.patrol.append(Vector2D(700,700))
-		self.target_agent = Agent(self,mode='patrol',color='ORANGE')
+		self.patrol.append(Vector2D(randrange(100,300),randrange(600,700)))# random point in top left corner
+		self.patrol.append(Vector2D(randrange(600,700),randrange(600,700)))# random point in top right corner
+		self.patrol.append(Vector2D(randrange(100,300),randrange(100,300)))# random point in bottom left corner
+		self.patrol.append(Vector2D(randrange(600,700),randrange(100,300)))# random point in bottom right corner
+		
+		self.target_agent = None
 
 	def update(self, delta):
 		if not self.paused:
 			for agent in self.agents:
 				agent.update(delta)
-			self.target_agent.update(delta)
+			if self.target_agent != None:
+				self.target_agent.update(delta)
 			self.hunter.update(delta)
 			active_bullets = [] # this is to replace list of current bullets after list is checked
 			for bullet in self.bullets:
 				bullet.update(delta)
-				if bullet.check_hit():
-					self.target_agent.been_hit = True
-					self.target_agent.hit_timer = 0
-				elif bullet.check_lifetime():
+				if self.target_agent != None:
+					if bullet.check_hit():
+						self.target_agent = None
+				if bullet.check_lifetime():
 					active_bullets.append(bullet)
 			self.bullets = active_bullets
 
@@ -130,7 +134,8 @@ class World(object):
 		elif symbol in AGENT_TYPES:
 			self.agent_type = AGENT_TYPES[symbol]
 		elif symbol == pyglet.window.key.SPACE:
-			self.agents.append(Agent(self))
+			if self.target_agent == None:
+				self.target_agent = Agent(self,mode='wander')
 		elif symbol == pyglet.window.key.R:
 			for agent in self.agents:
 				agent.randomise_path()

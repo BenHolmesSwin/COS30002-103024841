@@ -38,9 +38,8 @@ AGENT_MODES = {
 	pyglet.window.key._8: 'wander',
 	pyglet.window.key._9: 'hide',
 	pyglet.window.key._0: 'patrol',
-	# dont press, here to be part of the list, button functionality not implemented
-	pyglet.window.key.NUM_0: 'hold', 
-	pyglet.window.key.NUM_ENTER: 'shoot',
+	pyglet.window.key.NUM_0: 'attack',
+	pyglet.window.key.NUM_9: 'hold',
 }
 
 class Agent(object):
@@ -53,6 +52,7 @@ class Agent(object):
 	}
 
 	def __init__(self, world=None, scale=30.0, mass=1.0, mode='seek', color = 'ORANGE'):
+
 		# keep a reference to the world object
 		self.world = world
 		self.mode = mode
@@ -67,7 +67,7 @@ class Agent(object):
 		self.accel = Vector2D() # current acceleration due to force
 		self.mass = mass
 
-		# data for drawing this agent
+	# data for drawing this agent
 		self.color = color
 		self.vehicle_shape = [
 			Point2D(-10,  6),
@@ -82,7 +82,7 @@ class Agent(object):
 			batch=window.get_batch("main")
 		)
 
-		# wander info render objects
+	# wander info render objects
 		self.info_wander_circle = pyglet.shapes.Circle(0, 0, 0, color=COLOUR_NAMES['WHITE'], batch=window.get_batch("info"))
 		self.info_wander_target = pyglet.shapes.Circle(0, 0, 0, color=COLOUR_NAMES['GREEN'], batch=window.get_batch("info"))
 		# add some handy debug drawing info lines - force and velocity
@@ -103,35 +103,48 @@ class Agent(object):
 			),
 		]
 
-		### path to follow?
+	### path to follow?
 		self.path = Path()
 		self.randomise_path()
 		self.waypoint_threshold = 70.0
 
-		### wander details
+	### wander details
 		self.wander_target = Vector2D(1, 0)
 		self.wander_dist = 1.0 * scale
 		self.wander_radius = 1.0 * scale
 		self.wander_jitter = 10.0 * scale
 		self.bRadius = scale
 
-		# limits?
+	# limits?
 		self.max_speed = 3.0 * scale
 		self.max_force = 1000
 
-		# debug draw info?
+	# debug draw info?
 		self.show_info = False
 
-		# hide 
+	# hide 
 		self.hide_points = []
 
-		#shoot
+	#shoot
 		self.been_hit = False
 		self.hit_timer = 0
 		self.hit_lifetime = 60
 
-		#patrol
+	#patrol
 		self.patrol_couter = 0
+
+	# soldier
+		# how many bullets at full and bullet number counter
+		self.bullets_max = 5
+		self.bullets = self.bullets_max
+
+		# how many frames/updates reloading takes and reload time counter
+		self.reload_max = 30
+		self.reload_timer = self.reload_max 
+		
+		# how many frames/updates between shots and delay time counter
+		self.shot_delay_max = 10
+		self.shot_delay_timer = self.shot_delay_max
 
 	def calculate(self,delta):
 		# calculate the current steering force
@@ -159,8 +172,8 @@ class Agent(object):
 			force = self.patrol()
 		elif mode == 'hold':
 			force = Vector2D()
-		elif mode == 'shoot':
-			force = self.shoot(self.world.target_agent,self.world.bullet_mode)
+		elif mode == 'attack':
+			force = self.attack(self.world.target_agent)
 		else:
 			force = Vector2D()
 		self.force = force
@@ -344,19 +357,48 @@ class Agent(object):
 		predicted_pos = target.pos + target.vel * look_ahead_time
 		bullet_start_pos = self.pos.copy()
 		self.world.bullets.append(Bullet(self.world,bullet_start_pos,predicted_pos,bullet_mode))
-		self.mode = 'hold' #switch off shoot mode to only have one shot fired
 		return Vector2D()
+	
+	def reload(self):
+		if self.reload_timer > 0:
+				self.reload_timer -= 1
+		else:
+			self.reload_timer = self.reload_max
+			self.bullets = self.bullets_max
 
 	def patrol(self):
 		'''patrols between a patrol point list in order, looping'''
+		# patroling
 		target = self.world.patrol[self.patrol_couter]
 		target_vel = self.seek(target)
 		if self.pos.distance(target) < 10:
 			self.patrol_couter += 1
 			if self.patrol_couter >= len(self.world.patrol):
 				self.patrol_couter = 0
+		# attacking descision
+		if self.world.target_agent != None:
+			self.mode = 'attack'
 		return target_vel
 	
+	def attack(self,target):
+		if self.world.target_agent != None:
+			if self.bullets > 0:
+				# shooting (shot delay on outside of shoot function to not cause clarity issues in shoot function)
+				if self.shot_delay_timer == 0:
+					self.shoot(target,self.world.bullet_mode)
+					self.bullets -= 1
+					self.shot_delay_timer = self.shot_delay_max 
+				else:
+					self.shot_delay_timer -= 1
+			# reloading
+			else:
+				self.reload()
+				
+			return self.seek(target.pos)
+		else:
+			self.mode = 'patrol'
+			return Vector2D()
+
 	def hit(self):
 		'''controls hit coloring and duration of color change'''
 		self.vehicle.color = COLOUR_NAMES['BLUE']
